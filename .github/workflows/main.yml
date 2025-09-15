@@ -1,0 +1,104 @@
+name: Deploy to S3
+
+# Controls when the workflow will run
+on:
+  # Trigger on any push to the 'main' branch
+  push:
+    branches: [ main ]
+  # Trigger on any pull request targeting the 'main' branch
+  pull_request:
+    branches: [ main ]
+
+# This workflow is composed of multiple jobs
+jobs:
+  # JOB 1: Run Linting and Tests
+  test:
+    # Name of the job
+    name: Run Lint & Tests
+    # The type of machine to run the job on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Step 1: Checkout the repository code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up the correct version of Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Set this to your project's Node version
+          cache: 'npm'
+
+      # Step 3: Install NPM dependencies (from package-lock.json or yarn.lock)
+      - name: Install Dependencies
+        run: npm ci # Uses the exact versions from the lockfile for reproducible builds
+
+      # Step 4: Run a linter (e.g., ESLint). This step will fail if linting errors are found.
+      - name: Run Linter
+        run: npm run lint # Ensure you have a 'lint' script defined in your package.json
+
+      # Step 5: Run the test suite
+      - name: Run Tests
+        run: npm test
+        # If your tests need a database, you must configure a PostgreSQL service container.
+        # Uncomment the section below if you need to run tests that require a real DB.
+        # env:
+        #   DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+
+    # **UNCOMMENT THIS SECTION IF YOUR TESTS NEED POSTGRESQL**
+    # services:
+    #   postgres:
+    #     image: postgres:15
+    #     env:
+    #       POSTGRES_USER: postgres
+    #       POSTGRES_PASSWORD: postgres
+    #       POSTGRES_DB: test_db
+    #     options: >-
+    #       --health-cmd pg_isready
+    #       --health-interval 10s
+    #       --health-timeout 5s
+    #       --health-retries 5
+    #     ports:
+    #       - 5432:5432
+
+  # JOB 2: Build and Deploy - ONLY runs on push to main (not on PRs)
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    # This job MUST wait for the 'test' job to complete successfully first.
+    needs: test
+    # Crucial: Only run this job when a PR is merged (push) to the main branch.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Project
+        run: npm run build # This must be your script to create the production bundle (e.g., in a 'dist/' folder)
+
+      - name: Configure AWS Credentials
+        # This official AWS action configures the AWS CLI for subsequent steps.
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }} # e.g., us-east-1
+
+      - name: Deploy to S3
+        # Syncs the built files to your S3 bucket, deleting any old files.
+        run: |
+          aws s3 sync ./build/ s3://${{ secrets.S3_BUCKET_NAME }} \
+          --delete
+        # If your build folder is named differently (e.g., 'dist'), change './build/' to match.
