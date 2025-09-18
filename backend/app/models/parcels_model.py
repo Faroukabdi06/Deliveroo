@@ -25,14 +25,14 @@ class Parcel(db.Model):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     tracking_id = Column(String, index=True, nullable=False, unique=True)
 
-    customer_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    customer_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False,index=True)
     pickup_address_id = Column(UUID(as_uuid=True), ForeignKey("addresses.id"), nullable=False)
-    delivery_address_id = Column(UUID(as_uuid=True), ForeignKey("addresses.id"), nullable=False)
+    delivery_address_id = Column(UUID(as_uuid=True), ForeignKey("addresses.id"), nullable=False,index=True)
 
     weight_kg = Column(Float, nullable=True)
     dimensions = Column(String, nullable=True)  
 
-    status = Column(Enum(ParcelStatus), default=ParcelStatus.CREATED, nullable=False)
+    status = Column(Enum(ParcelStatus), default=ParcelStatus.CREATED, nullable=False,index=True)
 
     estimated_delivery_date = Column(Date, nullable=True)
 
@@ -46,6 +46,7 @@ class Parcel(db.Model):
     customer = relationship("User", back_populates="parcels")
     pickup_address = relationship("Address", foreign_keys=[pickup_address_id])
     delivery_address = relationship("Address", foreign_keys=[delivery_address_id])
+    status_history = relationship("StatusHistory", back_populates="parcel", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Parcel(tracking_id={self.tracking_id}, status={self.status.name})>"
