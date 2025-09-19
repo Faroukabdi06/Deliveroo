@@ -2,9 +2,9 @@ from zxcvbn import zxcvbn
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
-from models.reset_password_token import ResetPasswordToken
-from models.user import User
-from database import get_db
+from models.reset_password_model import ResetPasswordToken
+from models.user import User #change to your actual user model path
+from app.extensions import get_db
 from datetime import datetime, timedelta
 from passlib.hash import bcrypt
 import secrets

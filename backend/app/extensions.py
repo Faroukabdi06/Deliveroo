@@ -9,3 +9,6 @@ migrate = Migrate()
 bcrypt = Bcrypt()
 jwt = JWTManager()
 cors = CORS()
+
+def get_db():
+    return db.session

@@ -28,6 +28,10 @@ sqlalchemy = "==2.0.43"
 typing-extensions = "==4.13.2"
 werkzeug = "==3.0.6"
 zipp = "==3.20.2"
+pytest = "*"
+zxcvbn = "*"
+fastapi = "*"
+passlib = {extras = ["bcrypt"], version = "*"}
 
 [dev-packages]
 
