@@ -30,7 +30,7 @@ class Parcel(db.Model):
     delivery_address_id = Column(UUID(as_uuid=True), ForeignKey("addresses.id"), nullable=False,index=True)
 
     weight_kg = Column(Float, nullable=True)
-    dimensions = Column(String, nullable=True)  
+    description = Column(String, nullable=True)  
 
     status = Column(Enum(ParcelStatus), default=ParcelStatus.CREATED, nullable=False,index=True)
 
@@ -44,8 +44,8 @@ class Parcel(db.Model):
         nullable=False
     )
     customer = relationship("User", back_populates="parcels")
-    pickup_address = relationship("Address", foreign_keys=[pickup_address_id])
-    delivery_address = relationship("Address", foreign_keys=[delivery_address_id])
+    pickup_address = relationship("Address", foreign_keys=[pickup_address_id] , back_populates="pickup_parcels")
+    delivery_address = relationship("Address", foreign_keys=[delivery_address_id], back_populates='delivery_parcels')
     status_history = relationship("StatusHistory", back_populates="parcel", cascade="all, delete-orphan")
 
     def __repr__(self):
