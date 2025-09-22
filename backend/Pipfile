@@ -32,6 +32,7 @@ pytest = "*"
 zxcvbn = "*"
 fastapi = "*"
 passlib = {extras = ["bcrypt"], version = "*"}
+email-validator = "*"
 
 [dev-packages]
 
