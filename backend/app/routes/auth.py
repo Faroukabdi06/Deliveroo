@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from extensions import db
-from models import User
+from models import User,UserRole
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity,create_refresh_token
 
 
@@ -17,12 +17,15 @@ def signup():
     role_str = data.get("role","customer")
 
     try:
-        role = UserRole(role_str.lower())
+        role = UserRole(role_str.upper())
     except ValueError:
         return jsonify({"msg":"Invalid role"}),400
 
     if not email or not password:
         return jsonify({"msg": "email and password required"}), 400
+
+    if User.query.filter_by(phone_number=phone_number).first():
+    return jsonify({"msg": "phone number already exists"}), 400
 
     if User.query.filter_by(email = email).first():
         return jsonify({"msg":"email already exists"}),400

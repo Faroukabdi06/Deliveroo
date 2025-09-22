@@ -2,11 +2,13 @@ import uuid
 import enum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
-from sqlalchemy_serialzer import SerializerMixin
+from sqlalchemy_serializer import SerializerMixin
 from .extensions import db,bcrypt
 from datetime import datetime,timezone
 from email_validator import validate_email, EmailNotValidError
 from sqlalchemy.orm import relationship
+from sqlalchemy import Column, String, Float, Date, DateTime, ForeignKey, Enum, Text, Numeric
+
 
 
 
@@ -38,11 +40,14 @@ class User(db.Model,SerializerMixin):
         nullable = False,
         default = UserRole.CUSTOMER
     )
+    parcels = relationship("Parcel", back_populates="customer", cascade="all, delete-orphan")
     notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
+    status_updates = relationship("StatusHistory", back_populates="user", cascade="all, delete-orphan")
 
 
 
     serialize_rules = ('-_password_hash',)
+
 
 
     def set_email(self, email: str):
@@ -64,6 +69,11 @@ class User(db.Model,SerializerMixin):
         return bcrypt.check_password_hash(self._password_hash,plain_password)
 
 
+def generate_tracking_id():
+
+    date_str = datetime.utcnow().strftime("%Y%m%d")
+    random_part = str(uuid.uuid4())[:4]
+    return f"PD-{date_str}-{random_part}"
 
 class ParcelStatus(enum.Enum):
     CREATED = "CREATED"
@@ -74,11 +84,11 @@ class ParcelStatus(enum.Enum):
     CANCELLED = "CANCELLED"
 
 
-class Parcel(db.Model):
+class Parcel(db.Model,SerializerMixin):
     __tablename__ = "parcels"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid)
-    tracking_id = Column(String, index=True, nullable=False, unique=True)
+    tracking_id = Column(String, index=True, unique=True, nullable=False, default=generate_tracking_id)
 
     customer_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False,index=True)
     pickup_address_id = Column(UUID(as_uuid=True), ForeignKey("addresses.id"), nullable=False)
@@ -109,7 +119,7 @@ class Parcel(db.Model):
 
 
 
-class StatusHistory(db.Model):
+class StatusHistory(db.Model,SerializerMixin):
     __tablename__ = 'status_history'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid)
