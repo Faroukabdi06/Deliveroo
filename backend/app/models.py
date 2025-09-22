@@ -17,4 +17,6 @@ class StatusHistory(db.Model):
     location_lng = db.Column(db.Numeric(10, 7))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     
-    actor = db.relationship('User')
+    # Relationships
+    parcel = relationship("Parcel", back_populates="status_history")
+    user = relationship("User", back_populates="status_updates")
