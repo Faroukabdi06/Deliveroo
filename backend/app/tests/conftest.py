@@ -1,10 +1,11 @@
 import pytest
 from app import create_app
 from app.extensions import db
+from app.config import TestingConfig
 
 @pytest.fixture
 def app():
-    app = create_app("testing")  # Make sure you have a testing config in config.py
+    app = create_app("testing")
     with app.app_context():
         db.create_all()
         yield app
@@ -18,3 +19,9 @@ def client(app):
 @pytest.fixture
 def runner(app):
     return app.test_cli_runner()
+
+
+@pytest.fixture
+def session(app):
+    with app.app_context():
+        yield db.session
