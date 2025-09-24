@@ -7,6 +7,7 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///deliveroo.db")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "supersecret")
+    SECRET_KEY = os.getenv("SECRET_KEY", "devsecret")
 
 class DevConfig(Config):
     DEBUG = True
@@ -16,5 +17,5 @@ class ProdConfig(Config):
 
 class TestingConfig(Config):
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:" 
-    WTF_CSRF_ENABLED = False 
+    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+    WTF_CSRF_ENABLED = False
