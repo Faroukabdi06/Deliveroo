@@ -1,69 +1,70 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
-from extensions import db
-from models import User, Parcel, StatusHistory, ParcelStatus, Notification, Address
+from app.extensions import db
+from app.models import User, Parcel, StatusHistory, ParcelStatus, Notification, Address
+from app.schemas import ParcelSchema, AddressRequestSchema
 from datetime import datetime
 from sqlalchemy import func
 
-admin_bp = Blueprint("admin", __name__, url_prefix="/api/v1/admin")
+admin_bp = Blueprint("admin", __name__)
+parcel_schema = ParcelSchema()
+parcel_schema_many = ParcelSchema(many=True)
+address_schema = AddressRequestSchema()
 
-# Restrict routes to admins
+# Admin-only decorator
 def admin_required(fn):
     from functools import wraps
-
     @wraps(fn)
     def wrapper(*args, **kwargs):
         claims = get_jwt()
         if claims.get("role") != "ADMIN":
             return jsonify({"msg": "Admins only!"}), 403
         return fn(*args, **kwargs)
-
     return wrapper
 
-
-# List All Parcels
 @admin_bp.route("/parcels", methods=["GET"])
 @jwt_required()
 @admin_required
-def list_all_parcels():
-    parcels = Parcel.query.all()
-    return jsonify([{
-        "id": str(p.id),
-        "tracking_id": p.tracking_id,
-        "status": p.status.value,
-        "customer_id": str(p.customer_id),
-        "created_at": p.created_at.isoformat()
-    } for p in parcels]), 200
+def list_parcels():
+    page = int(request.args.get("page", 1))
+    per_page = int(request.args.get("per_page", 20))
+    status_filter = request.args.get("status")
 
+    query = Parcel.query.order_by(Parcel.created_at.desc())
+    if status_filter:
+        try:
+            status_enum = ParcelStatus(status_filter)
+            query = query.filter(Parcel.status == status_enum)
+        except ValueError:
+            return jsonify({"success": False, "msg": "Invalid status filter"}), 400
 
-# Get Parcel Details
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    parcels = pagination.items
+
+    data = parcel_schema_many.dump(parcels)
+
+    return jsonify({
+        "success": True,
+        "data": data,
+        "pagination": {
+            "page": page,
+            "per_page": per_page,
+            "total": pagination.total,
+            "total_pages": pagination.pages
+        }
+    }), 200
+
 @admin_bp.route("/parcels/<uuid:parcel_id>", methods=["GET"])
 @jwt_required()
 @admin_required
-def get_parcel_details(parcel_id):
+def get_parcel(parcel_id):
     parcel = Parcel.query.get(parcel_id)
     if not parcel:
-        return jsonify({"msg": "Parcel not found"}), 404
+        return jsonify({"success": False, "msg": "Parcel not found"}), 404
 
-    return jsonify({
-        "id": str(parcel.id),
-        "tracking_id": parcel.tracking_id,
-        "status": parcel.status.value,
-        "customer_id": str(parcel.customer_id),
-        "pickup_address": parcel.pickup_address.to_dict() if parcel.pickup_address else None,
-        "delivery_address": parcel.delivery_address.to_dict() if parcel.delivery_address else None,
-        "status_history": [{
-            "status": h.status.value,
-            "actor_id": str(h.actor_id),
-            "notes": h.notes,
-            "location": {"lat": float(h.location_lat) if h.location_lat else None,
-                         "lng": float(h.location_lng) if h.location_lng else None},
-            "timestamp": h.timestamp.isoformat()
-        } for h in parcel.status_history]
-    }), 200
+    parcel_data = parcel_schema.dump(parcel)
+    return jsonify({"success": True, "data": parcel_data}), 200
 
-
-# Update Parcel Status
 
 @admin_bp.route("/parcels/<uuid:parcel_id>/status", methods=["POST"])
 @jwt_required()
@@ -76,14 +77,13 @@ def update_parcel_status(parcel_id):
 
     parcel = Parcel.query.get(parcel_id)
     if not parcel:
-        return jsonify({"msg": "Parcel not found"}), 404
+        return jsonify({"success": False, "msg": "Parcel not found"}), 404
 
     try:
         status_enum = ParcelStatus(new_status)
     except ValueError:
-        return jsonify({"msg": "Invalid status"}), 400
+        return jsonify({"success": False, "msg": "Invalid status"}), 400
 
-    # Update parcel status
     parcel.status = status_enum
 
     # Log history
@@ -107,34 +107,46 @@ def update_parcel_status(parcel_id):
     db.session.add(notification)
 
     db.session.commit()
-    return jsonify({"msg": f"Parcel {parcel.tracking_id} updated to {status_enum.value}"}), 200
+    return jsonify({"success": True, "msg": f"Parcel updated to {status_enum.value}"}), 200
 
-
-# Update Parcel Details
 
 @admin_bp.route("/parcels/<uuid:parcel_id>", methods=["PATCH"])
 @jwt_required()
 @admin_required
 def update_parcel_details(parcel_id):
-    data = request.get_json()
     parcel = Parcel.query.get(parcel_id)
     if not parcel:
-        return jsonify({"msg": "Parcel not found"}), 404
+        return jsonify({"success": False, "msg": "Parcel not found"}), 404
 
-    # Allow updates for address and delivery date
-    if "delivery_address_id" in data:
-        parcel.delivery_address_id = data["delivery_address_id"]
-    if "pickup_address_id" in data:
-        parcel.pickup_address_id = data["pickup_address_id"]
+    data = request.get_json()
+
+    # Update pickup/delivery addresses
+    if "pickup_address" in data:
+        try:
+            address_data = address_schema.load(data["pickup_address"])
+        except Exception as e:
+            return jsonify({"success": False, "errors": str(e)}), 400
+        pickup_address = Address.query.get(parcel.pickup_address_id)
+        for key, value in address_data.items():
+            setattr(pickup_address, key, value)
+        db.session.add(pickup_address)
+
+    if "delivery_address" in data:
+        try:
+            address_data = address_schema.load(data["delivery_address"])
+        except Exception as e:
+            return jsonify({"success": False, "errors": str(e)}), 400
+        delivery_address = Address.query.get(parcel.delivery_address_id)
+        for key, value in address_data.items():
+            setattr(delivery_address, key, value)
+        db.session.add(delivery_address)
+
     if "estimated_delivery_date" in data:
         parcel.estimated_delivery_date = data["estimated_delivery_date"]
 
     db.session.commit()
-    return jsonify({"msg": "Parcel details updated"}), 200
+    return jsonify({"success": True, "msg": "Parcel details updated"}), 200
 
-
-
-# Cancel Parcel (Admin Override)
 
 @admin_bp.route("/parcels/<uuid:parcel_id>/cancel", methods=["POST"])
 @jwt_required()
@@ -142,11 +154,10 @@ def update_parcel_details(parcel_id):
 def cancel_parcel(parcel_id):
     parcel = Parcel.query.get(parcel_id)
     if not parcel:
-        return jsonify({"msg": "Parcel not found"}), 404
+        return jsonify({"success": False, "msg": "Parcel not found"}), 404
 
     parcel.status = ParcelStatus.CANCELLED
 
-    # Log history
     history = StatusHistory(
         parcel_id=parcel.id,
         status=ParcelStatus.CANCELLED,
@@ -155,7 +166,6 @@ def cancel_parcel(parcel_id):
     )
     db.session.add(history)
 
-    # Notify customer
     notification = Notification(
         user_id=parcel.customer_id,
         message=f"Your parcel {parcel.tracking_id} was cancelled by admin",
@@ -164,18 +174,15 @@ def cancel_parcel(parcel_id):
     db.session.add(notification)
 
     db.session.commit()
-    return jsonify({"msg": f"Parcel {parcel.tracking_id} cancelled by admin"}), 200
+    return jsonify({"success": True, "msg": f"Parcel {parcel.tracking_id} cancelled by admin"}), 200
 
-
-# System Stats / Dashboard
 
 @admin_bp.route("/stats", methods=["GET"])
 @jwt_required()
 @admin_required
 def system_stats():
     total_parcels = Parcel.query.count()
-    active_parcels = Parcel.query.filter(Parcel.status != ParcelStatus.DELIVERED,
-                                         Parcel.status != ParcelStatus.CANCELLED).count()
+    active_parcels = Parcel.query.filter(Parcel.status.notin_([ParcelStatus.DELIVERED, ParcelStatus.CANCELLED])).count()
     delivered_today = Parcel.query.filter(
         Parcel.status == ParcelStatus.DELIVERED,
         func.date(Parcel.updated_at) == datetime.utcnow().date()
@@ -184,6 +191,7 @@ def system_stats():
     total_customers = User.query.filter(User.role == "CUSTOMER").count()
 
     return jsonify({
+        "success": True,
         "total_parcels": total_parcels,
         "active_parcels": active_parcels,
         "delivered_today": delivered_today,
