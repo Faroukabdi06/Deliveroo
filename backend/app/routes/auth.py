@@ -116,6 +116,7 @@ def login():
         "success": True,
         "access_token": access_token,
         "refresh_token": refresh_token
+        "role": user.role,
     }), 200
 
 @auth_bp.route("/forgot-password", methods=["POST"])
