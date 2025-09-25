@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
-from app.extensions import db
-from app.models import User, Parcel, StatusHistory, ParcelStatus, Notification, Address
-from app.schemas import ParcelSchema, AddressRequestSchema
+from ..extensions import db
+from ..models import User, Parcel, StatusHistory, ParcelStatus, Notification, Address
+from ..schemas import ParcelSchema, AddressRequestSchema
 from datetime import datetime
 from sqlalchemy import func
 
