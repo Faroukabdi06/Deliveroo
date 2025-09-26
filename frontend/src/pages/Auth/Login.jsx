@@ -11,7 +11,7 @@ function Login() {
 
   const { loading, error, role, token } = useSelector((state) => state.auth);
 
-  // 👇 Whenever token/role changes, redirect user
+  // 👇 When token/role changes, it redirects user to there specified dashboard
   useEffect(() => {
     if (token && role === "CUSTOMER") {
       navigate("/dashboard");
@@ -34,11 +34,7 @@ function Login() {
         initialValues={{ email: "", password: "" }}
         validationSchema={validationSchema}
         onSubmit={async (values, { setSubmitting }) => {
-          // 👇 Save the dispatched result
           const result = await dispatch(loginUser(values));
-
-          console.log("Login result payload:", result.payload);
-
           setSubmitting(false);
         }}
       >
