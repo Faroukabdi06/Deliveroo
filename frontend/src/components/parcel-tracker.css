@@ -1,0 +1,244 @@
+/* Parcel Map Styles */
+.parcel-map {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .route-info {
+    padding: 16px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .info-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  
+  .info-item .label {
+    font-weight: 600;
+    color: #475569;
+  }
+  
+  .info-item .value {
+    color: #1e293b;
+    font-weight: 500;
+  }
+  
+  .admin-note {
+    margin-top: 12px;
+    padding: 8px;
+    background: #dbeafe;
+    border-radius: 4px;
+    text-align: center;
+  }
+  
+  /* Parcel Timeline Styles */
+  .parcel-timeline {
+    background: white;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  
+  .status-badge {
+    background: #10B981;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  
+  .timeline-steps {
+    position: relative;
+  }
+  
+  .timeline-step {
+    display: flex;
+    margin-bottom: 24px;
+    position: relative;
+  }
+  
+  .timeline-step.completed .step-label {
+    color: #1f2937;
+    font-weight: 500;
+  }
+  
+  .timeline-step.current .step-label {
+    color: #3B82F6;
+    font-weight: 600;
+  }
+  
+  .step-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 16px;
+  }
+  
+  .indicator-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid;
+    font-size: 16px;
+    z-index: 2;
+    position: relative;
+  }
+  
+  .step-connector {
+    width: 2px;
+    height: 40px;
+    margin-top: 8px;
+    flex: 1;
+  }
+  
+  .step-content {
+    flex: 1;
+    padding-bottom: 8px;
+  }
+  
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+  
+  .step-label {
+    font-size: 1rem;
+    color: #6b7280;
+  }
+  
+  .current-badge {
+    background: #3B82F6;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  
+  .step-timestamp {
+    margin-bottom: 4px;
+  }
+  
+  .timestamp {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+  
+  .timestamp-pending {
+    font-size: 0.875rem;
+    color: #9ca3af;
+    font-style: italic;
+  }
+  
+  .step-notes {
+    font-size: 0.875rem;
+    color: #4b5563;
+    background: #f3f4f6;
+    padding: 8px;
+    border-radius: 4px;
+    margin-top: 4px;
+  }
+  
+  /* Status History Styles */
+  .status-history {
+    margin-top: 32px;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 24px;
+  }
+  
+  .status-history h4 {
+    margin-bottom: 16px;
+    color: #374151;
+  }
+  
+  .history-list {
+    space-y: 12px;
+  }
+  
+  .history-item {
+    background: #f9fafb;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    border-left: 4px solid #3B82F6;
+  }
+  
+  .history-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  
+  .status-icon {
+    font-size: 1.2rem;
+  }
+  
+  .status-label {
+    font-weight: 500;
+    color: #1f2937;
+  }
+  
+  .history-timestamp {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 4px;
+  }
+  
+  .history-updated-by {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    margin-bottom: 4px;
+  }
+  
+  .history-notes {
+    font-size: 0.875rem;
+    color: #4b5563;
+    background: white;
+    padding: 8px;
+    border-radius: 4px;
+    margin-top: 4px;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .timeline-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    
+    .timeline-step {
+      flex-direction: column;
+    }
+    
+    .step-indicator {
+      flex-direction: row;
+      margin-right: 0;
+      margin-bottom: 12px;
+    }
+    
+    .step-connector {
+      width: 40px;
+      height: 2px;
+      margin-top: 0;
+      margin-left: 8px;
+    }
+  }
