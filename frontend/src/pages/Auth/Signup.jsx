@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { signupUser } from "../../features/auth/authSlice";
+import { useNavigate } from "react-router-dom";
 
 // Yup validation schema
 const SignupSchema = Yup.object().shape({
@@ -22,9 +23,10 @@ const SignupSchema = Yup.object().shape({
   security_answer: Yup.string().required("Security answer is required"),
 });
 
-const Signup = () => {
+function Signup() {
   const dispatch = useDispatch();
   const { loading, error } = useSelector((state) => state.auth);
+  const navigate = useNavigate()
 
   const securityQuestions = [
     "What is your mother's maiden name?",
@@ -50,11 +52,15 @@ const Signup = () => {
             security_answer: "",
           }}
           validationSchema={SignupSchema}
-          onSubmit={(values) => {
-            // remove confirmPassword before sending
+          onSubmit={async (values, { setSubmitting }) => {
             const { confirmPassword, ...payload } = values;
-            dispatch(signupUser(payload));
+            const result = await dispatch(signupUser(payload));
+            if (result.meta.requestStatus === "fulfilled") {
+              navigate("/login");
+            }
+            setSubmitting(false);
           }}
+
         >
           {({ isSubmitting }) => (
             <Form className="space-y-3">
@@ -141,7 +147,6 @@ const Signup = () => {
                   className="w-full p-2 border rounded"
                 >
                   <option value="customer">Customer</option>
-                  <option value="admin">Admin</option>
                 </Field>
                 <ErrorMessage
                   name="role"
