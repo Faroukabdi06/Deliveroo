@@ -1,35 +1,29 @@
-import uuid
-import enum
-from datetime import datetime, timezone
-
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy_serializer import SerializerMixin
-from sqlalchemy.orm import relationship
 from sqlalchemy import (
     Column, String, Float, Date, DateTime, ForeignKey,
     Enum, Text, Numeric, Boolean, Index
 )
 from email_validator import validate_email, EmailNotValidError
-
-from .extensions import db, bcrypt
+from datetime import datetime, timezone
+import uuid
+import enum
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
+from sqlalchemy_serializer import SerializerMixin
+from app.extensions import db, bcrypt
 
 
 # Helpers
-
 def gen_uuid():
     return uuid.uuid4()
 
 
 def _generate_tracking_id():
-    """Generate unique tracking ID like PD-20250922-1a2b"""
     date_str = datetime.utcnow().strftime("%Y%m%d")
     random_part = str(uuid.uuid4())[:4]
     return f"PD-{date_str}-{random_part}"
 
 
-
 # Enums
-
 class UserRole(enum.Enum):
     CUSTOMER = "CUSTOMER"
     ADMIN = "ADMIN"
@@ -50,14 +44,12 @@ class NotificationType(enum.Enum):
     PARCEL_UPDATE = "PARCEL_UPDATE"
 
 
-
 # Models
-
 class User(db.Model, SerializerMixin):
     __tablename__ = "users"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid, unique=True, nullable=False)
-    name = Column(String(100), nullable=False, index=True)  # index for quick search
+    name = Column(String(100), nullable=False, index=True)
     email = Column(String(100), unique=True, nullable=False, index=True)
     phone_number = Column(String(20), unique=True, nullable=False, index=True)
     _password_hash = Column(String, nullable=False)
@@ -67,21 +59,15 @@ class User(db.Model, SerializerMixin):
                         onupdate=lambda: datetime.now(timezone.utc), index=True)
 
     role = Column(Enum(UserRole, name="user_role"), nullable=False, default=UserRole.CUSTOMER, index=True)
+    security_question = Column(String(255), nullable=True)
+    _security_answer_hash = Column(String, nullable=True)
 
     # Relationships
     parcels = relationship("Parcel", back_populates="customer", cascade="all, delete-orphan")
     notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
     status_updates = relationship("StatusHistory", back_populates="user", cascade="all, delete-orphan")
 
-    serialize_rules = ('-_password_hash',)
-
-
-    def set_email(self, email: str):
-        try:
-            valid = validate_email(email)
-            self.email = valid.email
-        except EmailNotValidError as e:
-            raise ValueError(f"Invalid email: {str(e)}")
+    serialize_rules = ('-_password_hash', '-_security_answer_hash')
 
     @property
     def password(self):
@@ -89,10 +75,16 @@ class User(db.Model, SerializerMixin):
 
     @password.setter
     def password(self, plain_password):
-        self._password_hash = bcrypt.generate_password_hash(plain_password).decode('utf-8')
+        self._password_hash = bcrypt.generate_password_hash(plain_password).decode("utf-8")
 
     def check_password(self, plain_password):
         return bcrypt.check_password_hash(self._password_hash, plain_password)
+
+    def set_security_answer(self, answer: str):
+        self._security_answer_hash = bcrypt.generate_password_hash(answer.lower().strip()).decode("utf-8")
+
+    def check_security_answer(self, answer: str) -> bool:
+        return bcrypt.check_password_hash(self._security_answer_hash, answer.lower().strip())
 
 
 class Parcel(db.Model, SerializerMixin):
@@ -118,7 +110,7 @@ class Parcel(db.Model, SerializerMixin):
     # Relationships
     customer = relationship("User", back_populates="parcels")
     pickup_address = relationship("Address", foreign_keys=[pickup_address_id], back_populates="pickup_parcels")
-    delivery_address = relationship("Address", foreign_keys=[delivery_address_id], back_populates='delivery_parcels')
+    delivery_address = relationship("Address", foreign_keys=[delivery_address_id], back_populates="delivery_parcels")
     status_history = relationship("StatusHistory", back_populates="parcel", cascade="all, delete-orphan")
 
     def __repr__(self):
@@ -126,12 +118,12 @@ class Parcel(db.Model, SerializerMixin):
 
 
 class StatusHistory(db.Model, SerializerMixin):
-    __tablename__ = 'status_history'
+    __tablename__ = "status_history"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid)
-    parcel_id = Column(UUID(as_uuid=True), ForeignKey('parcels.id'), nullable=False, index=True)
+    parcel_id = Column(UUID(as_uuid=True), ForeignKey("parcels.id"), nullable=False, index=True)
     status = Column(Enum(ParcelStatus), nullable=False, index=True)
-    actor_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False, index=True)
+    actor_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
     notes = Column(Text)
     location_lat = Column(Numeric(10, 7))
     location_lng = Column(Numeric(10, 7))
@@ -156,15 +148,25 @@ class Address(db.Model, SerializerMixin):
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), index=True)
 
     # Relationships
-    pickup_parcels = relationship(
-        "Parcel", foreign_keys="Parcel.pickup_address_id", backref="pickup_address", lazy=True
-    )
-    delivery_parcels = relationship(
-        "Parcel", foreign_keys="Parcel.delivery_address_id", backref="delivery_address", lazy=True
-    )
+    pickup_parcels = relationship("Parcel", foreign_keys="Parcel.pickup_address_id", back_populates="pickup_address")
+    delivery_parcels = relationship("Parcel", foreign_keys="Parcel.delivery_address_id", back_populates="delivery_address")
 
     def __repr__(self):
         return f"<Address {self.street}, {self.city}>"
 
 
+class Notification(db.Model, SerializerMixin):
+    __tablename__ = "notifications"
 
+    id = Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
+    message = Column(Text, nullable=False)
+    type = Column(Enum(NotificationType, name="notification_type"), nullable=False, default=NotificationType.INFO, index=True)
+    is_read = Column(Boolean, default=False, nullable=False, index=True)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False, index=True)
+
+    # Relationships
+    user = relationship("User", back_populates="notifications")
+
+    def __repr__(self):
+        return f"<Notification(user_id={self.user_id}, type={self.type.name}, is_read={self.is_read})>"
