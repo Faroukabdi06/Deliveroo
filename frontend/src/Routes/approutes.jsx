@@ -6,7 +6,7 @@ import Login from "../pages/Auth/Login";
 import Signup from "../pages/Auth/Signup";
 import Dashboard from "../pages/Customer/Dashboard";
 import AdminDashboard from "../pages/Admin/AdminDashboard";
-import LandingPage from "../pages/LandingPage"; // 👈 new import
+import LandingPage from "../pages/LandingPage";
 
 function AppRoutes() {
   const { token, role } = useSelector((state) => state.auth);
@@ -25,7 +25,7 @@ function AppRoutes() {
   return (
     <Routes>
       {/* Public Routes */}
-      <Route path="/" element={<LandingPage />} /> {/* 👈 Landing Page */}
+      <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
 

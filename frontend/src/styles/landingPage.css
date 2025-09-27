@@ -123,32 +123,56 @@
 }
 
 .feature-card {
-  background: #f0f8ff;
-  padding: 20px;
+  position: relative;
+  height: 280px;
   border-radius: 12px;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: flex-end;
   box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-  transition: box-shadow 0.3s;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .feature-card:hover {
-  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
 }
 
-.feature-card img {
-  height: 100px;
-  margin-bottom: 20px;
+/* gradient overlay */
+.feature-card::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60%;
+  background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+  z-index: 1;
 }
 
-.feature-card h4 {
+.feature-card-content {
+  position: relative;
+  z-index: 2;
+  color: #fff;
+  padding: 20px;
+  text-align: left;
+  width: 100%;
+}
+
+.feature-card-content h4 {
   font-size: 20px;
-  color: #1e90ff;
-  margin-bottom: 10px;
+  font-weight: 600;
+  margin-bottom: 8px;
 }
 
-.feature-card p {
-  color: #555;
-  font-size: 15px;
+.feature-card-content p {
+  font-size: 14px;
+  line-height: 1.4;
+  color: #f0f0f0;
 }
+
 
 /* Responsive */
 @media(min-width: 768px) {
