@@ -12,10 +12,10 @@ import ParcelForm from "./ParcelForm";
 import ParcelCard from "../../components/ParcelCard";
 
 export default function CustomerDashboard({ user }) {
-  const [view, setView] = useState("dashboard"); // "dashboard" | "parcels" | "form"
+  const [view, setView] = useState("dashboard");
   const [filter, setFilter] = useState("");
 
-  //backend fetch goes here
+  // Static parcels (no backend yet)
   const parcels = [
     { id: "123", recipientName: "Alice", deliveryAddress: "123 Main St", status: "in-transit" },
     { id: "124", recipientName: "Bob", deliveryAddress: "456 Park Ave", status: "delivered" },
@@ -24,139 +24,217 @@ export default function CustomerDashboard({ user }) {
 
   const filteredParcels = parcels.filter(
     (p) =>
-      p.recipientName.toLowerCase().includes(filter.toLowerCase()) ||
-      p.status.toLowerCase().includes(filter.toLowerCase())
+      p.recipientName?.toLowerCase().includes(filter.toLowerCase()) ||
+      p.status?.toLowerCase().includes(filter.toLowerCase())
   );
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      
-      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full">
-        <div className="p-6 border-b border-gray-200">
-          <h1 className="text-xl font-bold text-blue-600">Deliveroo</h1>
-          <p className="text-xs text-gray-500">Delivery Platform</p>
+    <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#f9fafb" }}>
+      {/* Sidebar */}
+      <aside
+        style={{
+          width: "16rem",
+          backgroundColor: "#fff",
+          borderRight: "1px solid #e5e7eb",
+          display: "flex",
+          flexDirection: "column",
+          position: "fixed",
+          height: "100%",
+        }}
+      >
+        <div style={{ padding: "1.5rem", borderBottom: "1px solid #e5e7eb" }}>
+          <h1 style={{ fontSize: "1.25rem", fontWeight: "bold", color: "#2563eb" }}>Deliveroo</h1>
+          <p style={{ fontSize: "0.75rem", color: "#6b7280" }}>Delivery Platform</p>
         </div>
 
-        <nav className="flex-1 p-4 space-y-2">
+        <nav style={{ flex: 1, padding: "1rem" }}>
           <button
             onClick={() => setView("dashboard")}
-            className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg ${
-              view === "dashboard" ? "bg-blue-50 text-blue-600" : "hover:bg-gray-100"
-            }`}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.75rem",
+              width: "100%",
+              padding: "0.5rem 0.75rem",
+              borderRadius: "0.5rem",
+              backgroundColor: view === "dashboard" ? "#eff6ff" : "transparent",
+              color: view === "dashboard" ? "#2563eb" : "#374151",
+              border: "none",
+              cursor: "pointer",
+            }}
           >
             <Home size={18} /> Dashboard
           </button>
           <button
             onClick={() => setView("parcels")}
-            className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg ${
-              view === "parcels" ? "bg-blue-50 text-blue-600" : "hover:bg-gray-100"
-            }`}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.75rem",
+              width: "100%",
+              padding: "0.5rem 0.75rem",
+              borderRadius: "0.5rem",
+              backgroundColor: view === "parcels" ? "#eff6ff" : "transparent",
+              color: view === "parcels" ? "#2563eb" : "#374151",
+              border: "none",
+              cursor: "pointer",
+            }}
           >
             <Package size={18} /> My Parcels
           </button>
           <button
             onClick={() => setView("form")}
-            className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg ${
-              view === "form" ? "bg-blue-50 text-blue-600" : "hover:bg-gray-100"
-            }`}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.75rem",
+              width: "100%",
+              padding: "0.5rem 0.75rem",
+              borderRadius: "0.5rem",
+              backgroundColor: view === "form" ? "#eff6ff" : "transparent",
+              color: view === "form" ? "#2563eb" : "#374151",
+              border: "none",
+              cursor: "pointer",
+            }}
           >
             <PlusCircle size={18} /> Send Parcel
           </button>
         </nav>
 
-        <div className="p-4 border-t border-gray-200 space-y-4">
-          <button className="flex items-center gap-2 text-gray-700 hover:text-blue-600 w-full">
+        <div style={{ padding: "1rem", borderTop: "1px solid #e5e7eb" }}>
+          <button
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              color: "#374151",
+              border: "none",
+              background: "none",
+              cursor: "pointer",
+            }}
+          >
             <Settings size={18} /> Settings
           </button>
-          <div className="flex items-center gap-3">
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginTop: "1rem" }}>
             <img
               src="https://via.placeholder.com/40"
               alt="profile"
-              className="w-10 h-10 rounded-full"
+              style={{ width: "2.5rem", height: "2.5rem", borderRadius: "9999px" }}
             />
             <div>
-              <p className="text-sm font-medium">{user?.name || "John Smith"}</p>
-              <p className="text-xs text-gray-500">Customer Account</p>
+              <p style={{ fontSize: "0.875rem", fontWeight: "500" }}>{user?.name || "John Smith"}</p>
+              <p style={{ fontSize: "0.75rem", color: "#6b7280" }}>Customer Account</p>
             </div>
           </div>
         </div>
       </aside>
 
-      
-      <main className="flex-1 ml-64 p-8">
+      {/* Main content */}
+      <main style={{ flex: 1, marginLeft: "16rem", padding: "2rem" }}>
         {view === "dashboard" && (
           <>
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 mb-3">
+            <h2
+              style={{
+                fontSize: "1.875rem",
+                fontWeight: "bold",
+                color: "#111827",
+                marginBottom: "0.75rem",
+              }}
+            >
               Welcome back, {user?.name || "John Smith"}!
             </h2>
-            <p className="text-base text-gray-600 leading-relaxed mb-6">
-              Manage your deliveries, track shipments, and stay updated with real-time
-              notifications.
+            <p style={{ fontSize: "1rem", color: "#4b5563", marginBottom: "1.5rem" }}>
+              Manage your deliveries, track shipments, and stay updated with real-time notifications.
             </p>
 
-            
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-              <div className="p-4 bg-blue-50 border rounded-lg">
-                <p className="text-sm text-blue-600">Active Deliveries</p>
-                <p className="text-2xl font-bold">1</p>
-                <div className="flex items-center gap-1 text-xs text-blue-500">
+            {/* Stats Grid */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <div style={{ padding: "1rem", backgroundColor: "#eff6ff", borderRadius: "0.5rem" }}>
+                <p style={{ fontSize: "0.875rem", color: "#2563eb" }}>Active Deliveries</p>
+                <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>1</p>
+                <div style={{ display: "flex", gap: "0.25rem", fontSize: "0.75rem", color: "#2563eb" }}>
                   <Activity size={14} /> In progress
                 </div>
               </div>
-              <div className="p-4 bg-green-50 border rounded-lg">
-                <p className="text-sm text-green-600">Completed</p>
-                <p className="text-2xl font-bold">0</p>
-                <div className="flex items-center gap-1 text-xs text-green-500">
+              <div style={{ padding: "1rem", backgroundColor: "#ecfdf5", borderRadius: "0.5rem" }}>
+                <p style={{ fontSize: "0.875rem", color: "#059669" }}>Completed</p>
+                <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>0</p>
+                <div style={{ display: "flex", gap: "0.25rem", fontSize: "0.75rem", color: "#059669" }}>
                   <CheckCircle size={14} /> Delivered
                 </div>
               </div>
-              <div className="p-4 bg-purple-50 border rounded-lg">
-                <p className="text-sm text-purple-600">Total Parcels</p>
-                <p className="text-2xl font-bold">15</p>
-                <div className="flex items-center gap-1 text-xs text-purple-500">
+              <div style={{ padding: "1rem", backgroundColor: "#f5f3ff", borderRadius: "0.5rem" }}>
+                <p style={{ fontSize: "0.875rem", color: "#7c3aed" }}>Total Parcels</p>
+                <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>15</p>
+                <div style={{ display: "flex", gap: "0.25rem", fontSize: "0.75rem", color: "#7c3aed" }}>
                   <BarChart3 size={14} /> All time
                 </div>
               </div>
-              <div className="p-4 bg-yellow-50 border rounded-lg">
-                <p className="text-sm text-yellow-600">Success Rate</p>
-                <p className="text-2xl font-bold">0%</p>
-                <div className="flex items-center gap-1 text-xs text-yellow-500">
-                  ↑ Performance
-                </div>
-              </div>
             </div>
 
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            {/* Action Buttons */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
               <button
                 onClick={() => setView("form")}
-                className="flex flex-col items-center justify-center p-6 border rounded-lg bg-white hover:shadow"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  padding: "1.5rem",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "0.5rem",
+                  backgroundColor: "#fff",
+                  cursor: "pointer",
+                }}
               >
-                <PlusCircle className="text-blue-600 mb-2" size={28} />
-                <p className="font-medium">Send Parcel</p>
-                <p className="text-sm text-gray-500">Create new delivery</p>
+                <PlusCircle style={{ color: "#2563eb", marginBottom: "0.5rem" }} size={28} />
+                <p style={{ fontWeight: "500" }}>Send Parcel</p>
+                <p style={{ fontSize: "0.875rem", color: "#6b7280" }}>Create new delivery</p>
               </button>
               <button
                 onClick={() => setView("parcels")}
-                className="flex flex-col items-center justify-center p-6 border rounded-lg bg-white hover:shadow"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  padding: "1.5rem",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "0.5rem",
+                  backgroundColor: "#fff",
+                  cursor: "pointer",
+                }}
               >
-                <Package className="text-green-600 mb-2" size={28} />
-                <p className="font-medium">My Parcels</p>
-                <p className="text-sm text-gray-500">1 active delivery</p>
+                <Package style={{ color: "#059669", marginBottom: "0.5rem" }} size={28} />
+                <p style={{ fontWeight: "500" }}>My Parcels</p>
+                <p style={{ fontSize: "0.875rem", color: "#6b7280" }}>1 active delivery</p>
               </button>
             </div>
 
-          
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Recent Parcels</h3>
+            {/* Recent Parcels */}
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1rem" }}>
+              <h3 style={{ fontSize: "1.125rem", fontWeight: "600" }}>Recent Parcels</h3>
               <button
                 onClick={() => setView("parcels")}
-                className="text-blue-600 text-sm "
+                style={{ fontSize: "0.875rem", color: "#2563eb", cursor: "pointer" }}
               >
                 View All
               </button>
             </div>
-            <div className="grid gap-4">
+            <div style={{ display: "grid", gap: "1rem" }}>
               <ParcelCard
                 parcel={{
                   id: "12345",
@@ -171,22 +249,32 @@ export default function CustomerDashboard({ user }) {
 
         {view === "parcels" && (
           <>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-900">My Parcels</h2>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: "1rem",
+              }}
+            >
+              <h2 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>My Parcels</h2>
               <input
                 type="text"
                 placeholder="Filter by name or status..."
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
-                className="border px-3 py-2 rounded-lg text-sm"
+                style={{
+                  border: "1px solid #d1d5db",
+                  padding: "0.5rem 0.75rem",
+                  borderRadius: "0.5rem",
+                }}
               />
             </div>
-            <div className="grid gap-4">
+            <div style={{ display: "grid", gap: "1rem" }}>
               {filteredParcels.map((parcel) => (
                 <ParcelCard key={parcel.id} parcel={parcel} />
               ))}
               {filteredParcels.length === 0 && (
-                <p className="text-gray-500 text-sm">No parcels found.</p>
+                <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>No parcels found.</p>
               )}
             </div>
           </>

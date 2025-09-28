@@ -73,14 +73,10 @@ export default function ParcelCard({ parcel }) {
         <strong>Status:</strong>{" "}
         <span className="font-medium">{parcel.status}</span>
       </p>
-      <p className="mb-1">
-        <strong>Pickup:</strong> {parcel.pickup_address}
-      </p>
-      <p className="mb-1">
-        <strong>Destination:</strong> {parcel.destination_address}
-      </p>
+      <p><strong>Pickup:</strong> {parcel.pickup_address || "N/A"}</p>
+      <p><strong>Destination:</strong> {parcel.destination_address || "N/A"}</p>
       <p className="text-xs text-slate-500 mb-3">
-        Last updated: {new Date(parcel.updated_at).toLocaleString()}
+        Last updated: {parcel.updated_at ? new Date(parcel.updated_at).toLocaleString() : "Not available"}
       </p>
 
       <div className="flex gap-2">
