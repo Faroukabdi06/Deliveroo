@@ -1,0 +1,77 @@
+.parcel-map-container {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .route-info {
+    padding: 16px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  
+  .info-item {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .info-item .label {
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.875rem;
+    margin-bottom: 4px;
+  }
+  
+  .info-item .value {
+    color: #1e293b;
+    font-size: 0.9rem;
+  }
+  
+  .admin-note {
+    margin-top: 12px;
+    padding: 8px 12px;
+    background: #dbeafe;
+    border-radius: 4px;
+    text-align: center;
+    border: 1px solid #bfdbfe;
+  }
+  
+  .admin-note small {
+    color: #1e40af;
+    font-weight: 500;
+  }
+  
+  .info-window h4 {
+    margin: 0 0 8px 0;
+    color: #1f2937;
+  }
+  
+  .info-window p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.875rem;
+  }
+  
+  .info-window small {
+    color: #9ca3af;
+    font-style: italic;
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .info-grid {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    
+    .map-container-style {
+      height: 300px;
+    }
+  }
