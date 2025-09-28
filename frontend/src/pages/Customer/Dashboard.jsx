@@ -3,17 +3,18 @@ import {
   Home,
   Package,
   PlusCircle,
-  Settings,
   Activity,
   CheckCircle,
   BarChart3,
 } from "lucide-react";
 import ParcelForm from "./ParcelForm";
 import ParcelCard from "../../components/ParcelCard";
+import { useNavigate } from "react-router-dom";
 
 export default function CustomerDashboard({ user }) {
   const [view, setView] = useState("dashboard");
   const [filter, setFilter] = useState("");
+  const navigate=useNavigate()
 
   // Static parcels (no backend yet)
   const parcels = [
@@ -30,7 +31,7 @@ export default function CustomerDashboard({ user }) {
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#f9fafb" }}>
-      {/* Sidebar */}
+      
       <aside
         style={{
           width: "16rem",
@@ -113,7 +114,6 @@ export default function CustomerDashboard({ user }) {
               cursor: "pointer",
             }}
           >
-            <Settings size={18} /> Settings
           </button>
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginTop: "1rem" }}>
             <img
@@ -121,15 +121,35 @@ export default function CustomerDashboard({ user }) {
               alt="profile"
               style={{ width: "2.5rem", height: "2.5rem", borderRadius: "9999px" }}
             />
-            <div>
-              <p style={{ fontSize: "0.875rem", fontWeight: "500" }}>{user?.name || "John Smith"}</p>
-              <p style={{ fontSize: "0.75rem", color: "#6b7280" }}>Customer Account</p>
-            </div>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+            <p style={{ fontSize: "0.875rem", fontWeight: "500" }}>
+              {user?.name || "John Smith"}
+            </p>
+            <p style={{ fontSize: "0.75rem", color: "#6b7280" }}>Customer Account</p>
+
+            <button
+              onClick={() => navigate("/profile")}
+              style={{
+                marginTop: "0.5rem",
+                padding: "0.25rem 0.5rem",
+                fontSize: "0.75rem",
+                color: "#2563eb",
+                backgroundColor: "transparent",
+                border: "1px solid #2563eb",
+                borderRadius: "0.375rem",
+                cursor: "pointer",
+                alignSelf: "flex-start",
+              }}
+            >
+              View Profile
+            </button>
+          </div>
+
           </div>
         </div>
       </aside>
 
-      {/* Main content */}
+      
       <main style={{ flex: 1, marginLeft: "16rem", padding: "2rem" }}>
         {view === "dashboard" && (
           <>
@@ -147,7 +167,7 @@ export default function CustomerDashboard({ user }) {
               Manage your deliveries, track shipments, and stay updated with real-time notifications.
             </p>
 
-            {/* Stats Grid */}
+            
             <div
               style={{
                 display: "grid",
@@ -179,7 +199,7 @@ export default function CustomerDashboard({ user }) {
               </div>
             </div>
 
-            {/* Action Buttons */}
+            
             <div
               style={{
                 display: "grid",
@@ -224,7 +244,7 @@ export default function CustomerDashboard({ user }) {
               </button>
             </div>
 
-            {/* Recent Parcels */}
+            
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1rem" }}>
               <h3 style={{ fontSize: "1.125rem", fontWeight: "600" }}>Recent Parcels</h3>
               <button

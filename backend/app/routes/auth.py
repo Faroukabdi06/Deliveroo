@@ -115,7 +115,8 @@ def login():
     return jsonify({
         "success": True,
         "access_token": access_token,
-        "refresh_token": refresh_token
+        "refresh_token": refresh_token,
+        "role": user.role.value,
     }), 200
 
 @auth_bp.route("/forgot-password", methods=["POST"])
