@@ -10,18 +10,34 @@ export default function MultiStepParcelForm({ onClose, onSuccess }) {
   const totalSteps = 3;
 
   const [formData, setFormData] = useState({
-    senderName: "",
-    senderAddress: "",
-    receiverName: "",
-    receiverAddress: "",
-    parcelType: "",
-    weight: "",
-    deliveryDate: "",
+    pickup_address: {
+      name: "",
+      street: "",
+      city: "",
+      postal_code: "",
+      country: "",
+    },
+    delivery_address: {
+      name: "",
+      street: "",
+      city: "",
+      postal_code: "",
+      country: "",
+    },
+    weight_kg: "",
+    notes: "",
   });
 
-  const handleChange = (e) => {
+  const handleChange = (e, section) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (section) {
+      setFormData((prev) => ({
+        ...prev,
+        [section]: { ...prev[section], [name]: value },
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const nextStep = () => setStep((s) => Math.min(s + 1, totalSteps));
@@ -56,133 +72,74 @@ export default function MultiStepParcelForm({ onClose, onSuccess }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="p-6 bg-white shadow rounded-lg space-y-6 w-full max-w-xl"
+      style={{
+        padding: "24px",
+        backgroundColor: "white",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+        borderRadius: "8px",
+        display: "flex",
+        flexDirection: "column",
+        gap: "24px",
+        width: "100%",
+        maxWidth: "36rem",
+      }}
     >
-      <h2 className="text-xl font-bold text-gray-900 mb-2">New Parcel</h2>
+      <h2 style={{ fontSize: "1.25rem", fontWeight: "bold", color: "#111827" }}>
+        New Parcel
+      </h2>
 
-      
-      <div className="w-full bg-gray-200 rounded-full h-2">
+      {/* Progress Bar */}
+      <div style={{ width: "100%", backgroundColor: "#e5e7eb", borderRadius: "9999px", height: "8px" }}>
         <div
-          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-          style={{ width: `${progress}%` }}
+          style={{
+            backgroundColor: "#2563eb",
+            height: "8px",
+            borderRadius: "9999px",
+            transition: "all 0.3s",
+            width: `${progress}%`,
+          }}
         />
       </div>
 
-      {error && <p className="text-red-600">{error}</p>}
+      {error && <p style={{ color: "#dc2626" }}>{error}</p>}
 
-      
+      {/* Step 1: Pickup Address */}
       {step === 1 && (
-        <div className="space-y-4">
-          <input
-            type="text"
-            name="senderName"
-            placeholder="Sender Name"
-            value={formData.senderName}
-            onChange={handleChange}
-            required
-            className="border p-2 rounded w-full"
-          />
-          <input
-            type="text"
-            name="senderAddress"
-            placeholder="Sender Address"
-            value={formData.senderAddress}
-            onChange={handleChange}
-            required
-            className="border p-2 rounded w-full"
-          />
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={nextStep}
-              className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-            >
-              Next
-            </button>
-          </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <input name="name" placeholder="Pickup Name" value={formData.pickup_address.name} onChange={(e) => handleChange(e, "pickup_address")} required />
+          <input name="street" placeholder="Pickup Street" value={formData.pickup_address.street} onChange={(e) => handleChange(e, "pickup_address")} required />
+          <input name="city" placeholder="Pickup City" value={formData.pickup_address.city} onChange={(e) => handleChange(e, "pickup_address")} required />
+          <input name="postal_code" placeholder="Postal Code" value={formData.pickup_address.postal_code} onChange={(e) => handleChange(e, "pickup_address")} />
+          <input name="country" placeholder="Country" value={formData.pickup_address.country} onChange={(e) => handleChange(e, "pickup_address")} required />
+          <button type="button" onClick={nextStep}>Next</button>
         </div>
       )}
 
-      
+      {/* Step 2: Delivery Address */}
       {step === 2 && (
-        <div className="space-y-4">
-          <input
-            type="text"
-            name="receiverName"
-            placeholder="Receiver Name"
-            value={formData.receiverName}
-            onChange={handleChange}
-            required
-            className="border p-2 rounded w-full"
-          />
-          <input
-            type="text"
-            name="receiverAddress"
-            placeholder="Receiver Address"
-            value={formData.receiverAddress}
-            onChange={handleChange}
-            required
-            className="border p-2 rounded w-full"
-          />
-          <div className="flex justify-between">
-            <button
-              type="button"
-              onClick={prevStep}
-              className="bg-gray-300 text-gray-800 py-2 px-4 rounded hover:bg-gray-400"
-            >
-              Back
-            </button>
-            <button
-              type="button"
-              onClick={nextStep}
-              className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-            >
-              Next
-            </button>
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <input name="name" placeholder="Receiver Name" value={formData.delivery_address.name} onChange={(e) => handleChange(e, "delivery_address")} required />
+          <input name="street" placeholder="Receiver Street" value={formData.delivery_address.street} onChange={(e) => handleChange(e, "delivery_address")} required />
+          <input name="city" placeholder="Receiver City" value={formData.delivery_address.city} onChange={(e) => handleChange(e, "delivery_address")} required />
+          <input name="postal_code" placeholder="Postal Code" value={formData.delivery_address.postal_code} onChange={(e) => handleChange(e, "delivery_address")} />
+          <input name="country" placeholder="Country" value={formData.delivery_address.country} onChange={(e) => handleChange(e, "delivery_address")} required />
+
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <button type="button" onClick={prevStep}>Back</button>
+            <button type="button" onClick={nextStep}>Next</button>
           </div>
         </div>
       )}
 
-      
+      {/* Step 3: Parcel Details */}
       {step === 3 && (
-        <div className="space-y-4">
-          <input
-            type="text"
-            name="parcelType"
-            placeholder="Parcel Type (e.g., Document, Box)"
-            value={formData.parcelType}
-            onChange={handleChange}
-            className="border p-2 rounded w-full"
-          />
-          <input
-            type="number"
-            name="weight"
-            placeholder="Weight (kg)"
-            value={formData.weight}
-            onChange={handleChange}
-            className="border p-2 rounded w-full"
-          />
-          <input
-            type="date"
-            name="deliveryDate"
-            value={formData.deliveryDate}
-            onChange={handleChange}
-            className="border p-2 rounded w-full"
-          />
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <input type="number" name="weight_kg" placeholder="Weight (kg)" value={formData.weight_kg} onChange={handleChange} required />
+          <textarea name="notes" placeholder="Notes (optional)" value={formData.notes} onChange={handleChange} />
 
-          <div className="flex justify-between">
-            <button
-              type="button"
-              onClick={prevStep}
-              className="bg-gray-300 text-gray-800 py-2 px-4 rounded hover:bg-gray-400"
-            >
-              Back
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 disabled:opacity-50"
-            >
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <button type="button" onClick={prevStep}>Back</button>
+            <button type="submit" disabled={loading} style={{ backgroundColor: "#2563eb", color: "white", padding: "8px 16px", borderRadius: "4px", border: "none" }}>
               {loading ? "Submitting..." : "Submit"}
             </button>
           </div>

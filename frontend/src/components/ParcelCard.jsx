@@ -52,7 +52,6 @@ export default function ParcelCard({ parcel }) {
 
       if (!res.ok) throw new Error("Failed to cancel parcel");
       alert("Parcel cancelled.");
-      // Optionally: refresh list
     } catch (err) {
       console.error(err);
       alert("Error cancelling parcel");
@@ -64,29 +63,65 @@ export default function ParcelCard({ parcel }) {
   return (
     <div
       onClick={handleTrack}
-      className="border border-gray-200 rounded-xl p-4 bg-white cursor-pointer shadow transition-shadow hover:shadow-lg"
+      style={{
+        border: "1px solid #e5e7eb",
+        borderRadius: "0.75rem",
+        padding: "1rem",
+        backgroundColor: "white",
+        cursor: "pointer",
+        boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+        transition: "box-shadow 0.2s",
+      }}
+      onMouseEnter={(e) =>
+        (e.currentTarget.style.boxShadow = "0 4px 6px rgba(0,0,0,0.1)")
+      }
+      onMouseLeave={(e) =>
+        (e.currentTarget.style.boxShadow = "0 1px 2px rgba(0,0,0,0.05)")
+      }
     >
-      <h2 className="text-lg font-bold mb-2">
+      <h2 style={{ fontSize: "1.125rem", fontWeight: "bold", marginBottom: "0.5rem" }}>
         Tracking ID: {parcel.tracking_id || parcel.id}
       </h2>
-      <p className="mb-1">
+      <p style={{ marginBottom: "0.25rem" }}>
         <strong>Status:</strong>{" "}
-        <span className="font-medium">{parcel.status}</span>
+        <span style={{ fontWeight: 500 }}>{parcel.status}</span>
       </p>
-      <p><strong>Pickup:</strong> {parcel.pickup_address || "N/A"}</p>
-      <p><strong>Destination:</strong> {parcel.destination_address || "N/A"}</p>
-      <p className="text-xs text-slate-500 mb-3">
-        Last updated: {parcel.updated_at ? new Date(parcel.updated_at).toLocaleString() : "Not available"}
+      <p>
+        <strong>Pickup:</strong> {parcel.pickup_address || "N/A"}
+      </p>
+      <p>
+        <strong>Destination:</strong> {parcel.destination_address || "N/A"}
+      </p>
+      <p
+        style={{
+          fontSize: "0.75rem",
+          color: "#64748b",
+          marginBottom: "0.75rem",
+        }}
+      >
+        Last updated:{" "}
+        {parcel.updated_at
+          ? new Date(parcel.updated_at).toLocaleString()
+          : "Not available"}
       </p>
 
-      <div className="flex gap-2">
+      <div style={{ display: "flex", gap: "0.5rem" }}>
         <button
           onClick={(e) => {
             e.stopPropagation();
             handleTrack();
           }}
           disabled={loadingAction}
-          className="px-3 py-1.5 rounded-md border border-blue-600 bg-blue-600 text-white text-sm hover:bg-blue-700 disabled:opacity-50"
+          style={{
+            padding: "0.375rem 0.75rem",
+            borderRadius: "0.375rem",
+            border: "1px solid #2563eb",
+            backgroundColor: "#2563eb",
+            color: "white",
+            fontSize: "0.875rem",
+            cursor: "pointer",
+            opacity: loadingAction ? 0.5 : 1,
+          }}
         >
           Track
         </button>
@@ -94,7 +129,15 @@ export default function ParcelCard({ parcel }) {
         <button
           onClick={handleUpdateDestination}
           disabled={loadingAction}
-          className="px-3 py-1.5 rounded-md border border-gray-200 bg-slate-100 text-sm hover:bg-slate-200 disabled:opacity-50"
+          style={{
+            padding: "0.375rem 0.75rem",
+            borderRadius: "0.375rem",
+            border: "1px solid #e5e7eb",
+            backgroundColor: "#f1f5f9",
+            fontSize: "0.875rem",
+            cursor: "pointer",
+            opacity: loadingAction ? 0.5 : 1,
+          }}
         >
           Update
         </button>
@@ -102,7 +145,16 @@ export default function ParcelCard({ parcel }) {
         <button
           onClick={handleCancelParcel}
           disabled={loadingAction}
-          className="px-3 py-1.5 rounded-md border border-red-600 bg-white text-red-600 text-sm hover:bg-red-50 disabled:opacity-50"
+          style={{
+            padding: "0.375rem 0.75rem",
+            borderRadius: "0.375rem",
+            border: "1px solid #dc2626",
+            backgroundColor: "white",
+            color: "#dc2626",
+            fontSize: "0.875rem",
+            cursor: "pointer",
+            opacity: loadingAction ? 0.5 : 1,
+          }}
         >
           Cancel
         </button>
