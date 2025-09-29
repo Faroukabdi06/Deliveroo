@@ -23,13 +23,22 @@ export default function UserProfile() {
       successfulDeliveries: 13,
       totalSpent: 2400,
     },
-    preferences: { currency: "USD" },
+    preferences: { 
+      currency: "USD",       // already present
+      theme: "light",        // light | dark | system
+      emailUpdates: true,    // notifications
+      smsAlerts: false,
+      pushNotifications: true,
+    },
   });
+
 
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("personal");
   const [formData, setFormData] = useState(user);
   const navigate = useNavigate();
+
+  
 
   if (!user || !formData) return null;
 
@@ -221,7 +230,7 @@ export default function UserProfile() {
                 borderBottom: "1px solid #e5e7eb",
               }}
             >
-              {["personal", "preferences", "company", "notifications"].map((tab) => (
+              {["personal", "preferences", "notifications"].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -384,9 +393,61 @@ export default function UserProfile() {
               </>
             )}
 
-            {activeTab === "preferences" && <p>Preferences settings go here...</p>}
-            {activeTab === "company" && <p>Company details go here...</p>}
-            {activeTab === "notifications" && <p>Notification settings go here...</p>}
+            {activeTab === "preferences" && (
+              <>
+                <h2 style={{ marginBottom: "16px" }}>Preferences</h2>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <div>
+                    <label style={{ fontSize: "14px", fontWeight: "500" }}>Preferred Currency</label>
+                    <select
+                      value={formData.preferences.currency}
+                      disabled={!isEditing}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          preferences: { ...formData.preferences, currency: e.target.value },
+                        })
+                      }
+                      style={{ width: "100%", padding: "8px", marginTop: "4px" }}
+                    >
+                      <option value="USD">USD ($)</option>
+                      <option value="GBP">GBP (£)</option>
+                      <option value="EUR">EUR (€)</option>
+                      <option value="KES">KES (KSh)</option>
+                    </select>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {activeTab === "notifications" && (
+              <>
+                <h2 style={{ marginBottom: "16px" }}>Notifications</h2>
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  {[
+                    { key: "emailUpdates", label: "Email Updates" },
+                    { key: "smsAlerts", label: "SMS Alerts" },
+                    { key: "pushNotifications", label: "Push Notifications" },
+                  ].map((n) => (
+                    <label key={n.key} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <input
+                        type="checkbox"
+                        checked={formData.preferences[n.key] || false}
+                        disabled={!isEditing}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            preferences: { ...formData.preferences, [n.key]: e.target.checked },
+                          })
+                        }
+                      />
+                      {n.label}
+                    </label>
+                  ))}
+                </div>
+              </>
+            )}
+
           </div>
         </div>
       </div>
