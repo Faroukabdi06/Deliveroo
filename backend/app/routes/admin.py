@@ -182,19 +182,23 @@ def cancel_parcel(parcel_id):
 @admin_required
 def system_stats():
     total_parcels = Parcel.query.count()
-    active_parcels = Parcel.query.filter(Parcel.status.notin_([ParcelStatus.DELIVERED, ParcelStatus.CANCELLED])).count()
-    delivered_today = Parcel.query.filter(
-        Parcel.status == ParcelStatus.DELIVERED,
-        func.date(Parcel.updated_at) == datetime.utcnow().date()
-    ).count()
+    created = Parcel.query.filter(Parcel.status == ParcelStatus.CREATED).count()
+    picked_up = Parcel.query.filter(Parcel.status == ParcelStatus.PICKED_UP).count()
+    in_transit = Parcel.query.filter(Parcel.status == ParcelStatus.IN_TRANSIT).count()
+    out_for_delivery = Parcel.query.filter(Parcel.status == ParcelStatus.OUT_FOR_DELIVERY).count()
+    delivered = Parcel.query.filter(Parcel.status == ParcelStatus.DELIVERED).count()
     cancelled = Parcel.query.filter(Parcel.status == ParcelStatus.CANCELLED).count()
+    
     total_customers = User.query.filter(User.role == "CUSTOMER").count()
 
     return jsonify({
         "success": True,
         "total_parcels": total_parcels,
-        "active_parcels": active_parcels,
-        "delivered_today": delivered_today,
+        "created": created,
+        "picked_up": picked_up,
+        "in_transit": in_transit,
+        "out_for_delivery": out_for_delivery,
+        "delivered": delivered,
         "cancelled": cancelled,
         "total_customers": total_customers
     }), 200
