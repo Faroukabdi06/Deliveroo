@@ -31,7 +31,11 @@ def create_app(config_name="development"):
     migrate.init_app(app, db)
     bcrypt.init_app(app)
     jwt.init_app(app)
-    cors.init_app(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True, methods=["GET","POST","PUT","PATCH","DELETE","OPTIONS"], allow_headers="*")
+    cors.init_app(app,
+    resources={r"/*": {"origins": "http://localhost:5173"}},  
+    supports_credentials=True,
+    methods=["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"])
 
 
     # blueprints registration
