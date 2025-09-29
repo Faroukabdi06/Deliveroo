@@ -24,9 +24,9 @@ export default function UserProfile() {
       totalSpent: 2400,
     },
     preferences: { 
-      currency: "USD",       // already present
-      theme: "light",        // light | dark | system
-      emailUpdates: true,    // notifications
+      currency: "USD", 
+      theme: "light",  
+      emailUpdates: true,    
       smsAlerts: false,
       pushNotifications: true,
     },
