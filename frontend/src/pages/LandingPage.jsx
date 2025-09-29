@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import "../styles/landingPage.css";
+import "../styles/LandingPage.css";
 
 import deliveryImg from "../assets/delivery.jpg";
 import feature1 from "../assets/fast-delivery.jpg";
@@ -15,10 +15,10 @@ function LandingPage() {
       <header className="navbar">
         <h1 className="logo">Deliveroo</h1>
         <nav>
-          <Link to="/login" className="nav-link">
+          <Link to="/Auth" className="nav-link">
             Login
           </Link>
-          <Link to="/signup" className="btn-primary">
+          <Link to="/Auth" className="btn-primary">
             Sign Up
           </Link>
         </nav>
@@ -40,10 +40,10 @@ function LandingPage() {
             orders in real-time and enjoy quick deliveries.
           </p>
           <div className="hero-buttons">
-            <Link to="/signup" className="btn-primary">
+            <Link to="/Auth" className="btn-primary">
               Get Started
             </Link>
-            <Link to="/login" className="btn-outline">
+            <Link to="/Auth" className="btn-outline">
               Login
             </Link>
           </div>
@@ -108,7 +108,7 @@ function LandingPage() {
       {/* Footer */}
       <footer className="footer">
         <h4>Ready for your goods to be delivered?</h4>
-        <Link to="/signup" className="btn-secondary">
+        <Link to="/Auth" className="btn-secondary">
           Sign Up Now
         </Link>
         <p>© {new Date().getFullYear()} Deliveroo. All rights reserved.</p>
