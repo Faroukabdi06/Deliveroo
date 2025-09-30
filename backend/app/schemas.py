@@ -58,6 +58,6 @@ class AddressRequestSchema(Schema):
 
 class ParcelCreateSchema(Schema):
     weight_kg = fields.Float(required=True, validate=validate.Range(min=0.1))
-    notes = fields.Str(required=False, allow_none=True)
     pickup_address = fields.Nested(AddressRequestSchema, required=True)
     delivery_address = fields.Nested(AddressRequestSchema, required=True)
+
