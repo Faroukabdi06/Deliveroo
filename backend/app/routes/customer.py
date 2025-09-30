@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app.extensions import db
 from app.models import User,UserRole, Parcel, Address, StatusHistory, ParcelStatus, Notification, NotificationType,_generate_tracking_id
-from app.schemas import ParcelSchema, ParcelCreateSchema, AddressRequestSchema
+from app.schemas import ParcelSchema, ParcelCreateSchema, AddressRequestSchema, UserSchema
 from app.utilis.auth import jwt_required_customer
 from datetime import datetime, timedelta
 from marshmallow import ValidationError
@@ -10,6 +10,7 @@ customer_bp = Blueprint('customer', __name__)
 parcel_schema = ParcelSchema()
 parcel_create_schema = ParcelCreateSchema()
 address_schema = AddressRequestSchema()
+user_schema = UserSchema()
 
 
 @customer_bp.route('/parcels', methods=['POST'])
@@ -187,3 +188,34 @@ def cancel_parcel(current_user, parcel_id):
     db.session.commit()
 
     return jsonify({"success": True, "message": "Parcel cancelled successfully"}), 200
+#Get userprofile
+@customer_bp.route('/profile', methods=['GET'])
+@jwt_required_customer
+def get_profile(current_user):
+    user_data = user_schema.dump(current_user)
+    return jsonify({"success": True, "data": user_data}), 200
+
+
+# PATCH customer profile
+@customer_bp.route('/profile', methods=['PATCH'])
+@jwt_required_customer
+def update_profile(current_user):
+    json_data = request.json
+    if not json_data:
+        return jsonify({"success": False, "error": "No data provided"}), 400
+
+    # Only allow certain fields to be updated
+    allowed_fields = ['name', 'email', 'phone_number', 'password']
+    for field in allowed_fields:
+        if field in json_data:
+            if field == 'password':
+                current_user.password = json_data[field]
+            else:
+                setattr(current_user, field, json_data[field])
+
+    current_user.updated_at = datetime.utcnow()
+    db.session.add(current_user)
+    db.session.commit()
+
+    user_data = user_schema.dump(current_user)
+    return jsonify({"success": True, "data": user_data, "message": "Profile updated successfully"}), 200
