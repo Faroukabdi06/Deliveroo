@@ -61,9 +61,8 @@ class ParcelCreateSchema(Schema):
     pickup_address = fields.Nested(AddressRequestSchema, required=True)
     delivery_address = fields.Nested(AddressRequestSchema, required=True)
 
-class UserSchema(SQLAlchemyAutoSchema):
-    class Meta:
-        model = User
-        load_instance = True
-        exclude = ("_password_hash", "_security_answer_hash")
+class UserSchema(Schema):
+    model = User
+    load_instance = True
+    exclude = ("_password_hash", "_security_answer_hash")
 
