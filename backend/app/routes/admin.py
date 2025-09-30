@@ -1,15 +1,16 @@
+import uuid
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.extensions import db
 from app.models import User, Parcel, StatusHistory, ParcelStatus, Notification, Address
 from app.schemas import ParcelSchema, AddressRequestSchema
 from datetime import datetime
-from sqlalchemy import func
 
 admin_bp = Blueprint("admin", __name__)
 parcel_schema = ParcelSchema()
 parcel_schema_many = ParcelSchema(many=True)
 address_schema = AddressRequestSchema()
+
 
 # Admin-only decorator
 def admin_required(fn):
@@ -21,6 +22,7 @@ def admin_required(fn):
             return jsonify({"msg": "Admins only!"}), 403
         return fn(*args, **kwargs)
     return wrapper
+
 
 @admin_bp.route("/parcels", methods=["GET"])
 @jwt_required()
@@ -42,7 +44,6 @@ def list_parcels():
     parcels = pagination.items
 
     data = parcel_schema_many.dump(parcels)
-
     return jsonify({
         "success": True,
         "data": data,
@@ -53,6 +54,7 @@ def list_parcels():
             "total_pages": pagination.pages
         }
     }), 200
+
 
 @admin_bp.route("/parcels/<uuid:parcel_id>", methods=["GET"])
 @jwt_required()
@@ -88,9 +90,9 @@ def update_parcel_status(parcel_id):
 
     # Log history
     history = StatusHistory(
-        parcel_id=parcel.id,
+        parcel_id=uuid.UUID(str(parcel.id)),
         status=status_enum,
-        actor_id=get_jwt_identity(),
+        actor_id=uuid.UUID(get_jwt_identity()),
         notes=notes,
         location_lat=location.get("lat"),
         location_lng=location.get("lng"),
@@ -100,7 +102,7 @@ def update_parcel_status(parcel_id):
 
     # Notify customer
     notification = Notification(
-        user_id=parcel.customer_id,
+        user_id=uuid.UUID(str(parcel.customer_id)),
         message=f"Your parcel {parcel.tracking_id} is now {status_enum.value}",
         type="PARCEL_UPDATE"
     )
@@ -159,15 +161,15 @@ def cancel_parcel(parcel_id):
     parcel.status = ParcelStatus.CANCELLED
 
     history = StatusHistory(
-        parcel_id=parcel.id,
+        parcel_id=uuid.UUID(str(parcel.id)),
         status=ParcelStatus.CANCELLED,
-        actor_id=get_jwt_identity(),
+        actor_id=uuid.UUID(get_jwt_identity()),
         notes="Cancelled by admin"
     )
     db.session.add(history)
 
     notification = Notification(
-        user_id=parcel.customer_id,
+        user_id=uuid.UUID(str(parcel.customer_id)),
         message=f"Your parcel {parcel.tracking_id} was cancelled by admin",
         type="ALERT"
     )
