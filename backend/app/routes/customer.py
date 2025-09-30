@@ -20,57 +20,78 @@ def create_parcel(current_user):
     except ValidationError as e:
         return jsonify({"success": False, "errors": e.messages}), 400
 
-    # Create addresses
-    pickup_address = Address(**data['pickup_address'])
-    delivery_address = Address(**data['delivery_address'])
-    db.session.add(pickup_address)
-    db.session.add(delivery_address)
-    db.session.flush()  # Get IDs
-
-    # Create parcel
-    parcel = Parcel(
-        tracking_id=_generate_tracking_id(),
-        customer_id=current_user.id,
-        pickup_address_id=pickup_address.id,
-        delivery_address_id=delivery_address.id,
-        weight_kg=data['weight_kg'],
-        notes=data.get('notes'),
-        status=ParcelStatus.CREATED,
-        estimated_delivery_date=datetime.utcnow().date() + timedelta(days=2)
-    )
-    db.session.add(parcel)
-
-    # Status history
-    status_history = StatusHistory(
-        parcel_id=parcel.id,
-        status=ParcelStatus.CREATED,
-        actor_id=current_user.id,
-        notes=data.get('notes', 'Parcel created by customer')
-    )
-    db.session.add(status_history)
-
-    # Notify admins
-    admins = User.query.filter_by(role=UserRole.ADMIN).all()
-    for admin in admins:
-        notif = Notification(
-            user_id=admin.id,
-            message=f"New parcel {parcel.tracking_id} created by {current_user.name}",
-            type=NotificationType.ALERT
+    try:
+        # Create addresses (ensure lat/lng are safe)
+        pickup_address = Address(
+            street=data['pickup_address']['street'],
+            city=data['pickup_address']['city'],
+            country=data['pickup_address']['country'],
+            postal_code=data['pickup_address']['postal_code'],
+            lat=data['pickup_address'].get('lat'),
+            lng=data['pickup_address'].get('lng')
         )
-        db.session.add(notif)
+        delivery_address = Address(
+            street=data['delivery_address']['street'],
+            city=data['delivery_address']['city'],
+            country=data['delivery_address']['country'],
+            postal_code=data['delivery_address']['postal_code'],
+            lat=data['delivery_address'].get('lat'),
+            lng=data['delivery_address'].get('lng')
+        )
+        db.session.add(pickup_address)
+        db.session.add(delivery_address)
+        db.session.flush()  # Get IDs
 
-    # Notify customer
-    notif_customer = Notification(
-        user_id=current_user.id,
-        message=f"Your parcel {parcel.tracking_id} has been created successfully.",
-        type=NotificationType.PARCEL_UPDATE
-    )
-    db.session.add(notif_customer)
+        # Create parcel
+        parcel = Parcel(
+            tracking_id=_generate_tracking_id(),
+            customer_id=current_user.id,
+            pickup_address_id=pickup_address.id,
+            delivery_address_id=delivery_address.id,
+            weight_kg=data['weight_kg'],
+            notes=data.get('notes'),
+            status=ParcelStatus.CREATED,
+            estimated_delivery_date=datetime.utcnow().date() + timedelta(days=2)
+        )
+        db.session.add(parcel)
 
-    db.session.commit()
+        # Status history
+        status_history = StatusHistory(
+            parcel_id=parcel.id,
+            status=ParcelStatus.CREATED,
+            actor_id=current_user.id,
+            notes=data.get('notes', 'Parcel created by customer')
+        )
+        db.session.add(status_history)
 
-    parcel_data = parcel_schema.dump(parcel)
-    return jsonify({"success": True, "data": parcel_data, "message": "Parcel created successfully"}), 201
+        # Notify admins
+        admins = User.query.filter_by(role=UserRole.ADMIN).all()
+        for admin in admins:
+            notif = Notification(
+                user_id=admin.id,
+                message=f"New parcel {parcel.tracking_id} created by {current_user.name}",
+                type=NotificationType.ALERT
+            )
+            db.session.add(notif)
+
+        # Notify customer
+        notif_customer = Notification(
+            user_id=current_user.id,
+            message=f"Your parcel {parcel.tracking_id} has been created successfully.",
+            type=NotificationType.PARCEL_UPDATE
+        )
+        db.session.add(notif_customer)
+
+        # Commit everything safely
+        db.session.commit()
+
+        parcel_data = parcel_schema.dump(parcel)
+        return jsonify({"success": True, "data": parcel_data, "message": "Parcel created successfully"}), 201
+
+    except Exception as e:
+        db.session.rollback()
+        print("ERROR CREATING PARCEL:", e)
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 @customer_bp.route('/parcels', methods=['GET'])
