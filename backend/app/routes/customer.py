@@ -121,8 +121,7 @@ def update_parcel(current_user, parcel_id):
         notes="Delivery address updated by customer"
     )
     db.session.add(status_history)
-    db.session.commit()
-
+    
     # Notify customer
     notif_customer = Notification(
         user_id=current_user.id,
@@ -130,9 +129,19 @@ def update_parcel(current_user, parcel_id):
         type=NotificationType.PARCEL_UPDATE
     )
     db.session.add(notif_customer)
+
+    # Commit all changes at once
     db.session.commit()
 
-    return jsonify({"success": True, "message": "Parcel updated successfully"}), 200
+    # Dump the updated parcel
+    parcel_data = parcel_schema.dump(parcel)
+
+    return jsonify({
+        "success": True,
+        "message": "Parcel updated successfully",
+        "data": parcel_data  # <-- include updated parcel
+    }), 200
+
 
 
 @customer_bp.route('/parcels/<uuid:parcel_id>/cancel', methods=['POST'])
