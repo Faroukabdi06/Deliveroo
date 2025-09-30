@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.extensions import db
-from app.models import User, Parcel, Address, StatusHistory, ParcelStatus, Notification, NotificationType,_generate_tracking_id
+from app.models import User,UserRole, Parcel, Address, StatusHistory, ParcelStatus, Notification, NotificationType,_generate_tracking_id
 from app.schemas import ParcelSchema, ParcelCreateSchema, AddressRequestSchema
 from app.utilis.auth import jwt_required_customer
 from datetime import datetime, timedelta
