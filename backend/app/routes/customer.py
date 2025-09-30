@@ -20,14 +20,14 @@ def create_parcel(current_user):
     except ValidationError as e:
         return jsonify({"success": False, "errors": e.messages}), 400
 
-    # Create addresses
+    # Create pickup and delivery addresses
     pickup_address = Address(**data['pickup_address'])
     delivery_address = Address(**data['delivery_address'])
     db.session.add(pickup_address)
     db.session.add(delivery_address)
-    db.session.flush()  # Get IDs
+    db.session.flush()  # ensure IDs are available
 
-    # Create parcel
+    # Create the parcel
     parcel = Parcel(
         tracking_id=_generate_tracking_id(),
         customer_id=current_user.id,
@@ -38,27 +38,28 @@ def create_parcel(current_user):
         estimated_delivery_date=datetime.utcnow().date() + timedelta(days=2)
     )
     db.session.add(parcel)
+    db.session.flush()  # ensure parcel.id is available for status history
 
-    # Status history with a default note
+    # Add status history
     status_history = StatusHistory(
         parcel_id=parcel.id,
         status=ParcelStatus.CREATED,
         actor_id=current_user.id,
-        notes="Parcel created by customer"
+        notes=data.get('notes') or "Parcel created by customer"
     )
     db.session.add(status_history)
 
-    # Notify admins
+    # Notify all admins
     admins = User.query.filter_by(role=UserRole.ADMIN).all()
     for admin in admins:
-        notif = Notification(
+        notif_admin = Notification(
             user_id=admin.id,
             message=f"New parcel {parcel.tracking_id} created by {current_user.name}",
             type=NotificationType.ALERT
         )
-        db.session.add(notif)
+        db.session.add(notif_admin)
 
-    # Notify customer
+    # Notify the customer
     notif_customer = Notification(
         user_id=current_user.id,
         message=f"Your parcel {parcel.tracking_id} has been created successfully.",
@@ -66,10 +67,12 @@ def create_parcel(current_user):
     )
     db.session.add(notif_customer)
 
+    # Commit everything
     db.session.commit()
 
     parcel_data = parcel_schema.dump(parcel)
     return jsonify({"success": True, "data": parcel_data, "message": "Parcel created successfully"}), 201
+
 
 
 @customer_bp.route('/parcels', methods=['GET'])
