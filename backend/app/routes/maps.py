@@ -4,7 +4,7 @@ import os
 
 maps_bp = Blueprint("maps", __name__)
 
-GOOGLE_API_KEY = os.getenv("AIzaSyAwysK0-Tr-LDnmh2VKBVUhg-NJh6FiB2U")  
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 @maps_bp.route("/distance", methods=["GET"])
 def get_distance():
