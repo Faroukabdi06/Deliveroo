@@ -8,6 +8,7 @@ from app.routes.parcels import parcels_bp
 from app.routes.customer import customer_bp
 from app.routes.admin import admin_bp
 from app.routes.notifications import notifications_bp
+from app.routes.maps import maps_bp
 
 
 from . import models
@@ -44,6 +45,7 @@ def create_app(config_name="development"):
     app.register_blueprint(admin_bp, url_prefix="/api/admin")
     app.register_blueprint(parcels_bp, url_prefix="/api/parcels")
     app.register_blueprint(notifications_bp, url_prefix="/api/notifications")
+    app.register_blueprint(maps_bp, url_prefix="/api/maps")
 
 
     @app.route("/")
