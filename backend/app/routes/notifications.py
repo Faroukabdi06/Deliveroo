@@ -6,6 +6,7 @@ import uuid
 
 notifications_bp = Blueprint("notifications", __name__)
 
+
 @notifications_bp.get("/get/notifications")
 @jwt_required()
 def get_notifications():
@@ -56,7 +57,6 @@ def mark_notification_read(notification_id):
     return jsonify({"message": "Notification marked as read"}), 200
 
 
-
 @notifications_bp.patch("/mark/read-all")
 @jwt_required()
 def mark_all_notifications_read():
@@ -70,3 +70,37 @@ def mark_all_notifications_read():
     db.session.commit()
 
     return jsonify({"message": f"{updated} notifications marked as read"}), 200
+
+
+@notifications_bp.delete("/delete/<uuid:notification_id>")
+@jwt_required()
+def delete_notification(notification_id):
+    user_id_str = get_jwt_identity()
+    try:
+        user_id = uuid.UUID(user_id_str)
+    except ValueError:
+        return jsonify({"error": "Invalid user ID"}), 400
+
+    notif = Notification.query.filter_by(id=notification_id, user_id=user_id).first()
+    if not notif:
+        return jsonify({"error": "Notification not found"}), 404
+
+    db.session.delete(notif)
+    db.session.commit()
+
+    return jsonify({"message": "Notification deleted"}), 200
+
+
+@notifications_bp.delete("/delete/all")
+@jwt_required()
+def delete_all_notifications():
+    user_id_str = get_jwt_identity()
+    try:
+        user_id = uuid.UUID(user_id_str)
+    except ValueError:
+        return jsonify({"error": "Invalid user ID"}), 400
+
+    deleted_count = Notification.query.filter_by(user_id=user_id).delete()
+    db.session.commit()
+
+    return jsonify({"message": f"{deleted_count} notifications deleted"}), 200
