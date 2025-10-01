@@ -13,7 +13,7 @@ const testParcel = {
 function App() {
   return (
     <div style={{ padding: '20px' }}>
-      <h1>Parcel Map Test</h1>
+      <h1>Parcel Map</h1>
       <ParcelMap
         pickupAddress={testParcel.pickupAddress}
         destinationAddress={testParcel.destinationAddress}

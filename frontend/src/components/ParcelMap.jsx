@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { LoadScript, GoogleMap, Marker, Polyline, DirectionsRenderer, InfoWindow } from '@react-google-maps/api';
+import { LoadScript, GoogleMap, Marker, DirectionsRenderer, InfoWindow } from '@react-google-maps/api';
 
 const mapContainerStyle = {
   width: '100%',
@@ -24,7 +24,8 @@ const ParcelMap = ({
   const [distance, setDistance] = useState('');
   const [duration, setDuration] = useState('');
   const [selectedMarker, setSelectedMarker] = useState(null);
-  const mapRef = useRef();
+  const [markerIcons, setMarkerIcons] = useState(null);
+  const mapRef = useRef(null);
 
   useEffect(() => {
     if (pickupAddress && destinationAddress) {
@@ -75,29 +76,33 @@ const ParcelMap = ({
     return defaultCenter;
   };
 
-  const markerIcons = {
-    pickup: {
-      url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDNy4wMyAyIDMgNi4wMyAzIDExQzMgMTQuMjUgNC42IDE3LjE1IDcgMTguOUwxMiAyMkwxNyAxOC45QzE5LjQgMTcuMTUgMjEgMTQuMjUgMjEgMTFDMjEgNi4wMyAxNi45NyAyIDEyIDJaIiBmaWxsPSIjMzQ5OENGIi8+CjxjaXJjbGUgY3g9IjEyIiBjeT0iMTEiIHI9IjMiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=',
-      scaledSize: new window.google.maps.Size(32, 32)
-    },
-    destination: {
-      url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDNy4wMyAyIDMgNi4wMyAzIDExQzMgMTQuMjUgNC42IDE3LjE1IDcgMTguOUwxMiAyMkwxNyAxOC45QzE5LjQgMTcuMTUgMjEgMTQuMjUgMjEgMTFDMjEgNi4wMyAxNi45NyAyIDEyIDJaIiBmaWxsPSIjRjQ0MzM2Ii8+CjxjaXJjbGUgY3g9IjEyIiBjeT0iMTEiIHI9IjMiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=',
-      scaledSize: new window.google.maps.Size(32, 32)
-    },
-    current: {
-      url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTAiIGZpbGw9IiMxMEE3NDUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMiIvPgo8Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSI0IiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K',
-      scaledSize: new window.google.maps.Size(28, 28)
+  useEffect(() => {
+    if (window.google) {
+      setMarkerIcons({
+        pickup: {
+          url: "...",
+          scaledSize: new window.google.maps.Size(32, 32)
+        },
+        destination: {
+          url: "...",
+          scaledSize: new window.google.maps.Size(32, 32)
+        },
+        current: {
+          url: "...",
+          scaledSize: new window.google.maps.Size(28, 28)
+        }
+      });
     }
-  };
+  }, []); // only run once after Google script is loaded
 
   return (
     <div className="parcel-map">
-      <LoadScript googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}>
+      <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
           center={getMapCenter()}
           zoom={10}
-          onLoad={map => {
+          onLoad={(map) => {
             mapRef.current = map;
             setMap(map);
           }}
@@ -119,7 +124,7 @@ const ParcelMap = ({
           )}
 
           {/* Pickup Marker */}
-          {directions && (
+          {directions && markerIcons && (
             <Marker
               position={directions.routes[0].legs[0].start_location}
               icon={markerIcons.pickup}
@@ -128,7 +133,7 @@ const ParcelMap = ({
           )}
 
           {/* Destination Marker */}
-          {directions && (
+          {directions && markerIcons && (
             <Marker
               position={directions.routes[0].legs[0].end_location}
               icon={markerIcons.destination}
@@ -137,7 +142,7 @@ const ParcelMap = ({
           )}
 
           {/* Current Location Marker */}
-          {currentLocation && currentLocation.lat !== 0 && (
+          {currentLocation && currentLocation.lat !== 0 && markerIcons && (
             <Marker
               position={currentLocation}
               icon={markerIcons.current}
