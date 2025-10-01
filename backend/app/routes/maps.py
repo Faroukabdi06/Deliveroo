@@ -45,3 +45,31 @@ def get_distance():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@maps_bp.route("/reverse-geocode", methods=["GET"])
+def reverse_geocode():
+    lat = request.args.get("lat")
+    lng = request.args.get("lng")
+    if not lat or not lng:
+        return jsonify({"error": "lat and lng are required"}), 400
+
+    try:
+        url = "https://nominatim.openstreetmap.org/reverse"
+        params = {
+            "lat": lat,
+            "lon": lng,
+            "format": "json",
+        }
+        response = requests.get(url, params=params, headers={"User-Agent": "DeliverooApp"})
+        response.raise_for_status()
+        data = response.json()
+        address = data.get("address", {})
+
+        return jsonify({
+            "street": address.get("road") or "",
+            "city": address.get("city") or address.get("town") or address.get("village") or "",
+            "country": address.get("country") or "",
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
