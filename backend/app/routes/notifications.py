@@ -6,7 +6,7 @@ from app.models import Notification, User, UserRole
 notifications_bp = Blueprint("notifications", __name__)
 
 # Get notifications (works for both customers and admins)
-@notifications_bp.get("/notifications")
+@notifications_bp.get("/get/notifications")
 @jwt_required()
 def get_notifications():
     user_id = get_jwt_identity()
@@ -34,7 +34,7 @@ def get_notifications():
 
 
 # Mark a single notification as read
-@notifications_bp.patch("/notifications/<uuid:notification_id>/read")
+@notifications_bp.patch("/mark/<uuid:notification_id>/read")
 @jwt_required()
 def mark_notification_read(notification_id):
     user_id = get_jwt_identity()
@@ -47,7 +47,7 @@ def mark_notification_read(notification_id):
 
 
 # (Optional) Mark all notifications as read
-@notifications_bp.patch("/notifications/read-all")
+@notifications_bp.patch("/mark/read-all")
 @jwt_required()
 def mark_all_notifications_read():
     user_id = get_jwt_identity()
