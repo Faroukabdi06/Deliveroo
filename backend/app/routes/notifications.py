@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.extensions import db
-from app.models import Notification, User, UserRole
+from app.models import Notification, User
 import uuid
 
 notifications_bp = Blueprint("notifications", __name__)
@@ -11,12 +11,11 @@ notifications_bp = Blueprint("notifications", __name__)
 def get_notifications():
     user_id_str = get_jwt_identity()
     try:
-        user_id = uuid.UUID(user_id_str)  # <-- convert to UUID
+        user_id = uuid.UUID(user_id_str)
     except ValueError:
         return jsonify({"error": "Invalid user ID"}), 400
 
     user = User.query.get(user_id)
-
     if not user:
         return jsonify({"error": "User not found"}), 404
 
@@ -38,12 +37,18 @@ def get_notifications():
     ]), 200
 
 
-# Mark a single notification as read
 @notifications_bp.patch("/mark/<uuid:notification_id>/read")
 @jwt_required()
 def mark_notification_read(notification_id):
-    user_id = get_jwt_identity()
-    notif = Notification.query.filter_by(id=notification_id, user_id=user_id).first_or_404()
+    user_id_str = get_jwt_identity()
+    try:
+        user_id = uuid.UUID(user_id_str)
+    except ValueError:
+        return jsonify({"error": "Invalid user ID"}), 400
+
+    notif = Notification.query.filter_by(id=notification_id, user_id=user_id).first()
+    if not notif:
+        return jsonify({"error": "Notification not found"}), 404
 
     notif.is_read = True
     db.session.commit()
@@ -51,11 +56,16 @@ def mark_notification_read(notification_id):
     return jsonify({"message": "Notification marked as read"}), 200
 
 
-# (Optional) Mark all notifications as read
+
 @notifications_bp.patch("/mark/read-all")
 @jwt_required()
 def mark_all_notifications_read():
-    user_id = get_jwt_identity()
+    user_id_str = get_jwt_identity()
+    try:
+        user_id = uuid.UUID(user_id_str)
+    except ValueError:
+        return jsonify({"error": "Invalid user ID"}), 400
+
     updated = Notification.query.filter_by(user_id=user_id, is_read=False).update({"is_read": True})
     db.session.commit()
 
