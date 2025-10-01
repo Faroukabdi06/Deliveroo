@@ -2,14 +2,19 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.extensions import db
 from app.models import Notification, User, UserRole
+import uuid
 
 notifications_bp = Blueprint("notifications", __name__)
 
-# Get notifications (works for both customers and admins)
 @notifications_bp.get("/get/notifications")
 @jwt_required()
 def get_notifications():
-    user_id = get_jwt_identity()
+    user_id_str = get_jwt_identity()
+    try:
+        user_id = uuid.UUID(user_id_str)  # <-- convert to UUID
+    except ValueError:
+        return jsonify({"error": "Invalid user ID"}), 400
+
     user = User.query.get(user_id)
 
     if not user:
