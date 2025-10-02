@@ -1,4 +1,5 @@
 import { useState } from "react";
+import api from '../../api/axios';
 
 export default function MultiStepParcelForm({ onClose, onSuccess }) {
   const BASE_URL = import.meta.env.VITE_BACKEND_URL;
@@ -43,25 +44,18 @@ export default function MultiStepParcelForm({ onClose, onSuccess }) {
   const nextStep = () => setStep((s) => Math.min(s + 1, totalSteps));
   const prevStep = () => setStep((s) => Math.max(s - 1, 1));
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
     try {
-      const res = await fetch(`${BASE_URL}/parcels`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      if (!res.ok) throw new Error("Failed to create parcel");
-
-      const data = await res.json();
-      onSuccess?.(data);
+      const res = await api.post("/parcels", formData); 
+      onSuccess?.(res.data);
       onClose?.();
     } catch (err) {
-      setError(err.message);
+      console.error("Error creating parcel:", err);
+      setError(err.response?.data?.message || "Failed to create parcel");
     } finally {
       setLoading(false);
     }

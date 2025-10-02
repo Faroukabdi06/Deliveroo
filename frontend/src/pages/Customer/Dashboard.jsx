@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import api from '../../api/axios';
 import {
   Home,
   Package,
@@ -9,7 +10,7 @@ import {
 } from "lucide-react";
 import ParcelForm from "./ParcelForm";
 import ParcelCard from "../../components/ParcelCard";
-import { data, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function CustomerDashboard({ user }) {
   const [view, setView] = useState("dashboard");
@@ -20,37 +21,62 @@ export default function CustomerDashboard({ user }) {
   const [loadingParcels, setLoadingParcels] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch parcels when "parcels" view is active
-  useEffect(() => {
-    if (view !== "parcels") return;
-
-    const fetchParcels = async () => {
-      setLoadingParcels(true);
-      setError(null);
-      try {
-        const BASE_URL = import.meta.env.VITE_BASE_URL;
-        const res = await fetch(`${BASE_URL}/parcels`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+  
+useEffect(() => {
+  const fetchParcels = async () => {
+    try {
+      const response = await api.get("/parcels");
+      if (response.data && response.data.length > 0) {
+        setParcels(response.data);
+      } else {
+        // fallback if API returns empty
+        setParcels([
+          {
+            id: "1",
+            tracking_id: "TRACK123",
+            recipientName: "Alice",
+            deliveryAddress: "123 Main St",
+            weight_kg: 2.5,
+            description: "Books",
+            status: "IN_TRANSIT",
+            estimated_delivery_date: "2025-10-10",
           },
-        });
-
-        if (!res.ok) throw new Error("Failed to fetch parcels");
-
-        const data = await res.json();
-        setParcels(data || data); // adjust if API returns data differently
-      } catch (err) {
-        console.error(err);
-        console.log(parcels)
-        setError("Could not load parcels.");
-      } finally {
-        setLoadingParcels(false);
+          {
+            id: "2",
+            tracking_id: "TRACK456",
+            recipientName: "Bob",
+            deliveryAddress: "456 Oak Avenue",
+            weight_kg: 5.0,
+            description: "Electronics",
+            status: "CREATED",
+            estimated_delivery_date: "2025-10-15",
+          },
+        ]);
       }
-    };
+      setLoadingParcels(false);
+    } catch (error) {
+      console.error("Error fetching parcels:", error);
+      setError(true);
+      setParcels([
+        {
+          id: "fallback-1",
+          tracking_id: "FALLBACK123",
+          recipientName: "Charlie",
+          deliveryAddress: "789 Pine Street",
+          weight_kg: 1.2,
+          description: "Clothes",
+          status: "DELIVERED",
+          estimated_delivery_date: "2025-10-01",
+        },
+      ]);
+      setLoadingParcels(false);
+    }
+  };
 
-    fetchParcels();
-  }, [view]);
+  fetchParcels();
+}, []);
+
+
 
   const filteredParcels = parcels.filter(
     (p) =>
@@ -278,14 +304,13 @@ export default function CustomerDashboard({ user }) {
               </button>
             </div>
             <div style={{ display: "grid", gap: "1rem" }}>
-              <ParcelCard
-                parcel={{
-                  id: "12345",
-                  recipientName: "Alice",
-                  deliveryAddress: "123 Main St",
-                  status: "in-transit",
-                }}
-              />
+              {parcels.length > 0 ? (
+                parcels.map((parcel) => (
+                  <ParcelCard key={parcel.id} parcel={parcel} />
+                ))
+              ) : (
+                <p>No parcels found.</p>
+              )}
             </div>
           </>
         )}
@@ -312,15 +337,39 @@ export default function CustomerDashboard({ user }) {
             {error && <p style={{ color: "red" }}>{error}</p>}
 
             <div style={{ display: "grid", gap: "1rem" }}>
-              {filteredParcels.map((parcel) => (
-                <ParcelCard key={parcel.id} parcel={parcel} />
-              ))}
-              {filteredParcels.length === 0 && !loadingParcels && !error && (
-                <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>No parcels found.</p>
-              )}
+            {loadingParcels && (
+              <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>Loading parcels...</p>
+            )}
+
+            {error && (
+            <div>
+              <p style={{ color: "red", fontSize: "0.875rem" }}>
+                Failed to load parcels. Showing fallback parcels:
+              </p>
+              <div style={{ display: "grid", gap: "1rem" }}>
+                {parcels.map((parcel) => (
+                  <ParcelCard key={parcel.id} parcel={parcel} />
+                ))}
+              </div>
             </div>
-          </>
-        )}
+          )}
+
+
+            {!loadingParcels && !error && filteredParcels.length > 0 && (
+              filteredParcels.map((parcel) => (
+                <ParcelCard key={parcel.id} parcel={parcel} />
+              ))
+            )}
+
+            {!loadingParcels && !error && filteredParcels.length === 0 && (
+              <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>
+                No parcels found.
+              </p>
+            )}
+          </div>
+
+                    </>
+                  )}
 
         {view === "form" && <ParcelForm />}
       </main>

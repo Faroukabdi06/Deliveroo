@@ -1,45 +1,99 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
+import api from "../../api/axios"; 
 
 export default function UserProfile() {
-  const [user, setUser] = useState({
-    name: "John Smith",
-    email: "john@example.com",
-    role: "customer",
-    avatar: "",
-    dateOfBirth: "1985-06-15",
-    phone: "+44 7700 900123",
-    address: {
-      street: "123 Baker Street",
-      city: "London",
-      postalCode: "W1U 6TU",
-      country: "United Kingdom",
-    },
-    statistics: {
-      memberSince: "2023-01-15",
-      lastActive: "2025-09-12 14:30",
-      totalParcels: 15,
-      successfulDeliveries: 13,
-      totalSpent: 2400,
-    },
-    preferences: { 
-      currency: "USD", 
-      theme: "light",  
-      emailUpdates: true,    
-      smsAlerts: false,
-      pushNotifications: true,
-    },
-  });
-
-
+  const [user, setUser] = useState(null);
+  const [formData, setFormData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("personal");
-  const [formData, setFormData] = useState(user);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const navigate = useNavigate();
 
-  
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await api.get("/users/me"); 
+        const userData = res.data;
 
+        const formattedUser = {
+          id: userData.id,
+          name: userData.name,
+          email: userData.email,
+          role: userData.role,
+          phone: userData.phone_number,
+          dateOfBirth: userData.date_of_birth || "1990-01-01", // fallback
+          avatar: "",
+          address: {
+            street: "N/A",
+            city: "Nairobi",
+            postalCode: "00100",
+            country: "Kenya",
+          },
+          statistics: {
+            memberSince: userData.created_at,
+            lastActive: userData.updated_at,
+            totalParcels: userData.parcels?.length || 0,
+            successfulDeliveries:
+              userData.parcels?.filter((p) => p.status === "DELIVERED").length ||
+              0,
+            totalSpent: 0, 
+          },
+          preferences: {
+            currency: "KES",
+            emailUpdates: true,
+            smsAlerts: false,
+            pushNotifications: true,
+          },
+        };
+
+        setUser(formattedUser);
+        setFormData(formattedUser);
+      } catch (err) {
+        console.error("Error fetching user:", err);
+        setError("Failed to load user profile");
+        const fallbackUser = {
+          id: "demo-user-1",
+          name: "Jane Doe",
+          email: "jane.doe@example.com",
+          role: "customer",
+          phone: "+254 700 000000",
+          statistics: {
+            memberSince: "2023-01-01",
+            lastActive: "2025-09-25 18:00",
+            totalParcels: 5,
+            successfulDeliveries: 4,
+            totalSpent: 5600,
+          },
+          address: {
+            street: "Moi Avenue",
+            city: "Nairobi",
+            postalCode: "00100",
+            country: "Kenya",
+          },
+          preferences: {
+            currency: "KES",
+            emailUpdates: true,
+            smsAlerts: false,
+            pushNotifications: true,
+          },
+        };
+        setUser(fallbackUser);
+        setFormData(fallbackUser);
+
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  if (loading) return <p>Loading profile...</p>;
+  {error && <p style={{ color: "red" }}>{error} (Showing demo data)</p>}
   if (!user || !formData) return null;
 
   const handleSave = () => {
@@ -66,9 +120,14 @@ export default function UserProfile() {
       day: "numeric",
     });
 
-  const deliverySuccessRate = Math.round(
-    (user.statistics.successfulDeliveries / user.statistics.totalParcels) * 100
-  );
+  const deliverySuccessRate =
+    formData.statistics.totalParcels > 0
+      ? Math.round(
+          (formData.statistics.successfulDeliveries /
+            formData.statistics.totalParcels) *
+            100
+        )
+      : 0;
 
   return (
     <div
@@ -251,7 +310,12 @@ export default function UserProfile() {
             {activeTab === "personal" && (
               <>
                 <h2 style={{ marginBottom: "16px" }}>Personal Information</h2>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                <div style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "20px 16px", 
+                    alignItems: "start",
+                  }}>
                   <div>
                     <label style={{ fontSize: "14px", fontWeight: "500" }}>Full Name</label>
                     <input
