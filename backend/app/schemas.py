@@ -68,3 +68,11 @@ class UserSchema(SQLAlchemyAutoSchema):
         load_instance = True
         exclude = ("_password_hash", "_security_answer_hash")
 
+    role = fields.Method("get_role")
+
+    def get_role(self, obj):
+        try:
+            return obj.role.name
+        except AttributeError:
+            return obj.role
+
