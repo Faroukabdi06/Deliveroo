@@ -1,7 +1,7 @@
-// App.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { refreshToken } from "./features/auth/authSlice";
 
 // Pages
 import LandingPage from "./pages/LandingPage";
@@ -9,23 +9,59 @@ import AuthPage from "./pages/AuthPage";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AdminParcels from "./pages/Admin/AdminParcels";
 import AdminParcelManage from "./pages/Admin/AdminParcelManage";
-import CustomerDashboard from "./pages/CustomerDashboard";
+import AdminNotifications from "./pages/Admin/AdminNotifications";
 
-function App() {
+import CustomerDashboard from "./pages/customer/CustomerDashboard";
+import CustomerParcels from "./pages/customer/CustomerParcels";
+import CustomerParcelDetail from "./pages/customer/CustomerParcelDetail";
+import ParcelForm from "./components/customer/ParcelForm";
+import UserProfile from "./components/customer/Profile";
+import CustomerNotifications from "./pages/customer/CustomerNotifications";
+
+// -------------------- ProtectedRoute --------------------
+const ProtectedRoute = ({ children, allowedRoles }) => {
+  const dispatch = useDispatch();
   const { token, role } = useSelector((state) => state.auth);
+  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Protected route component
-  const ProtectedRoute = ({ children, allowedRoles }) => {
-    if (!token) return <Navigate to="/auth" replace />;
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        let accessToken = token;
 
-    const normalizedRole = role?.toLowerCase();
-    if (allowedRoles && !allowedRoles.includes(normalizedRole)) {
-      return <Navigate to="/" replace />;
-    }
+        if (!accessToken) {
+          // Attempt to refresh token using stored refresh token
+          const result = await dispatch(refreshToken()).unwrap();
+          accessToken = result.access_token;
+        }
 
-    return children;
-  };
+        if (accessToken) {
+          setIsAuthenticated(true);
+        }
+      } catch (err) {
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    checkAuth();
+  }, [dispatch, token]);
+
+  if (loading) return <p className="text-center mt-10">Checking authentication...</p>;
+  if (!isAuthenticated) return <Navigate to="/auth" replace />;
+
+  const normalizedRole = role?.toLowerCase() || localStorage.getItem("role")?.toLowerCase();
+  if (allowedRoles && !allowedRoles.includes(normalizedRole)) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
+
+// -------------------- App Component --------------------
+function App() {
   return (
     <Router>
       <Routes>
@@ -58,6 +94,14 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/admin/notifications"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminNotifications />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Customer Routes */}
         <Route
@@ -68,9 +112,52 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/customer/parcels"
+          element={
+            <ProtectedRoute allowedRoles={["customer"]}>
+              <CustomerParcels />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/customer/parcels/:id"
+          element={
+            <ProtectedRoute allowedRoles={["customer"]}>
+              <CustomerParcelDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/customer/parcels/create"
+          element={
+            <ProtectedRoute allowedRoles={["customer"]}>
+              <ParcelForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/customer/profile"
+          element={
+            <ProtectedRoute allowedRoles={["customer"]}>
+              <UserProfile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/customer/notifications"
+          element={
+            <ProtectedRoute allowedRoles={["customer"]}>
+              <CustomerNotifications />
+            </ProtectedRoute>
+          }
+        />
 
         {/* 404 */}
-        <Route path="*" element={<h1>404 - Not Found</h1>} />
+        <Route
+          path="*"
+          element={<h1 className="text-center mt-10">404 - Not Found</h1>}
+        />
       </Routes>
     </Router>
   );

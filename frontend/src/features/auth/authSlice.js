@@ -8,7 +8,7 @@ export const signupUser = createAsyncThunk(
   "auth/signupUser",
   async (userData, { rejectWithValue }) => {
     try {
-      const response = await api.post("auth/signup", userData);
+      const response = await api.post("/auth/signup", userData);
       return response.data; // { success, msg }
     } catch (error) {
       return rejectWithValue(error.response?.data || { msg: "Signup failed" });
@@ -21,11 +21,10 @@ export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async (credentials, { rejectWithValue }) => {
     try {
-      const response = await api.post("auth/login", credentials);
-
+      const response = await api.post("/auth/login", credentials);
       const { access_token, refresh_token, role } = response.data;
 
-      // Store tokens & role
+      // Persist tokens and role
       localStorage.setItem("token", access_token);
       localStorage.setItem("refreshToken", refresh_token);
       localStorage.setItem("role", role);
@@ -47,25 +46,54 @@ export const refreshToken = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const refresh_token = localStorage.getItem("refreshToken");
-      if (!refresh_token) throw new Error("No refresh token");
+      if (!refresh_token) throw new Error("No refresh token available");
 
       const response = await api.post(
         "/refresh",
         {},
-        {
-          headers: { Authorization: `Bearer ${refresh_token}` },
-        }
+        { headers: { Authorization: `Bearer ${refresh_token}` } }
       );
 
-      const { access_token } = response.data;
-      localStorage.setItem("token", access_token);
+      const { access_token, role } = response.data;
 
-      return access_token;
+      // Update localStorage
+      localStorage.setItem("token", access_token);
+      localStorage.setItem("role", role);
+
+      return { access_token, role };
     } catch (error) {
+      // Clear storage if refresh fails
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("role");
       return rejectWithValue(error.response?.data || { msg: "Token refresh failed" });
     }
   }
 );
+
+// Reset Password
+export const resetPassword = createAsyncThunk(
+  "auth/resetPassword",
+  async ({ email, security_answer, new_password }, { rejectWithValue, dispatch }) => {
+    try {
+      const response = await api.post("/auth/reset-password", {
+        email,
+        security_answer,
+        new_password,
+      });
+
+      if (response.data.success) {
+        // Clear tokens after password reset
+        dispatch(logout());
+      }
+
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || { msg: "Password reset failed" });
+    }
+  }
+);
+
 
 // ------------------- Slice -------------------
 
@@ -87,6 +115,8 @@ const authSlice = createSlice({
       state.token = null;
       state.refreshToken = null;
       state.role = null;
+      state.loading = false;
+      state.error = null;
       localStorage.removeItem("token");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("role");
@@ -124,8 +154,35 @@ const authSlice = createSlice({
       })
 
       // Refresh
+      .addCase(refreshToken.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(refreshToken.fulfilled, (state, action) => {
-        state.token = action.payload;
+        state.loading = false;
+        state.token = action.payload.access_token;
+        state.role = action.payload.role?.toLowerCase();
+      })
+      .addCase(refreshToken.rejected, (state, action) => {
+        state.loading = false;
+        state.token = null;
+        state.refreshToken = null;
+        state.role = null;
+        state.error = action.payload?.msg || "Token refresh failed";
+      })
+
+      // Reset Password
+      .addCase(resetPassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(resetPassword.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.msg || "Password reset failed";
       });
   },
 });

@@ -1,10 +1,13 @@
-// pages/AdminParcelManage.jsx
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import SideNav from "../../components/admin/SideNav";
 import TopBar from "../../components/admin/TopBar";
 import api from "../../api/axios";
+import MapComponent from "../../components/Maps/Maps";
+import { getDistanceDuration } from "../../components/Maps/Distance";
+import L from "leaflet";
 import "../../styles/Admin.css";
+import Spinner from "../../components/customer/spinner";
 
 const statusOptions = [
   "CREATED",
@@ -24,8 +27,16 @@ const AdminParcelManage = () => {
   const [lat, setLat] = useState("");
   const [lng, setLng] = useState("");
   const [error, setError] = useState("");
+  const [distance, setDistance] = useState("");
+  const [duration, setDuration] = useState("");
 
-  // Fetch parcel details
+  // Custom icon for current location
+  const currentLocationIcon = new L.Icon({
+    iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png", // different color pin
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+  });
+
   useEffect(() => {
     const fetchParcel = async () => {
       try {
@@ -38,6 +49,20 @@ const AdminParcelManage = () => {
             setLat(p.current_location.lat ?? "");
             setLng(p.current_location.lng ?? "");
           }
+
+          // Fetch distance & duration
+          if (p.pickup_address?.lat && p.delivery_address?.lat) {
+            try {
+              const result = await getDistanceDuration(
+                { lat: parseFloat(p.pickup_address.lat), lng: parseFloat(p.pickup_address.lng) },
+                { lat: parseFloat(p.delivery_address.lat), lng: parseFloat(p.delivery_address.lng) }
+              );
+              setDistance(result.distance);
+              setDuration(result.duration);
+            } catch (err) {
+              console.error("Failed to get distance/duration:", err);
+            }
+          }
         }
       } catch (err) {
         console.error(err.response || err);
@@ -49,13 +74,11 @@ const AdminParcelManage = () => {
     fetchParcel();
   }, [id]);
 
-  // Handle status update
   const handleUpdateStatus = async (e) => {
     e.preventDefault();
     try {
       const payload = { status, notes };
 
-      // Only include location if both lat and lng are provided
       if (lat !== "" && lng !== "") {
         payload.location = {
           lat: parseFloat(lat),
@@ -67,7 +90,6 @@ const AdminParcelManage = () => {
 
       if (res.data.success) {
         alert(res.data.msg);
-        // Refresh parcel data
         const updated = await api.get(`/admin/parcels/${id}`);
         setParcel(updated.data.data);
         setNotes("");
@@ -78,13 +100,12 @@ const AdminParcelManage = () => {
     } catch (err) {
       console.error(err.response || err);
       setError(
-        err.response?.data?.msg ||
-        "Failed to update status. Check console for details."
+        err.response?.data?.msg || "Failed to update status. Check console for details."
       );
     }
   };
 
-  if (loading) return <p>Loading parcel...</p>;
+  if (loading) return <Spinner/>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
   if (!parcel) return <p>Parcel not found</p>;
 
@@ -126,7 +147,7 @@ const AdminParcelManage = () => {
               placeholder="Add notes..."
             />
 
-            <label>Location (optional):</label>
+            <label>Current Location (click on map to set):</label>
             <div style={{ display: "flex", gap: "10px" }}>
               <input
                 type="number"
@@ -152,13 +173,38 @@ const AdminParcelManage = () => {
         <section className="status-history">
           <h2>Status History</h2>
           <ul>
-            {parcel.status_history?.map((h) => (
-              <li key={h.id}>
+            {parcel.status_history?.map((h,index) => (
+              <li key={h.id || index}>
                 <strong>{h.status}</strong> - {new Date(h.timestamp).toLocaleString()}<br />
                 Notes: {h.notes || "None"}
               </li>
             ))}
           </ul>
+        </section>
+
+        {/* Map & Distance */}
+        <section className="parcel-map">
+          <h2>Parcel Route</h2>
+          {parcel.pickup_address?.lat && parcel.delivery_address?.lat ? (
+            <>
+              <MapComponent
+                pickup={{ lat: parseFloat(parcel.pickup_address.lat), lng: parseFloat(parcel.pickup_address.lng) }}
+                destination={{ lat: parseFloat(parcel.delivery_address.lat), lng: parseFloat(parcel.delivery_address.lng) }}
+                currentLocation={lat && lng ? { lat: parseFloat(lat), lng: parseFloat(lng) } : null}
+                onMapClick={(newLat, newLng) => {
+                  setLat(newLat);
+                  setLng(newLng);
+                }}
+                currentLocationIcon={currentLocationIcon}
+                isAdmin={true} // Admin can drag and update location
+              />
+
+              <p><strong>Distance:</strong> {distance}</p>
+              <p><strong>Estimated Duration:</strong> {duration}</p>
+            </>
+          ) : (
+            <p>Pickup or delivery coordinates are missing.</p>
+          )}
         </section>
       </main>
     </div>
