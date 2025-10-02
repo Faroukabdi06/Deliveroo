@@ -96,7 +96,7 @@ const ParcelMap = ({
   return (
     <div className="parcel-map">
       <GoogleMap
-        mapContainerStyle={mapContainerStyle}
+        mapContainerStyle="parcel-map"
         center={getMapCenter()}
         zoom={10}
         onLoad={map => { mapRef.current = map; }}

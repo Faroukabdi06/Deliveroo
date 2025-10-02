@@ -63,6 +63,14 @@
     color: #9ca3af;
     font-style: italic;
   }
+  .parcel-map {
+    width: 100%;
+    height: 80vh; 
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 16px; /* optional spacing for route info below */
+  }
   
   /* Responsive design */
   @media (max-width: 768px) {
