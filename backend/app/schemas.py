@@ -1,5 +1,6 @@
 from marshmallow import Schema, fields, validate, post_dump
 from app.models import Parcel, Address, StatusHistory, ParcelStatus,User
+from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 
 
 class AddressSchema(Schema):
@@ -61,8 +62,9 @@ class ParcelCreateSchema(Schema):
     pickup_address = fields.Nested(AddressRequestSchema, required=True)
     delivery_address = fields.Nested(AddressRequestSchema, required=True)
 
-class UserSchema(Schema):
-    model = User
-    load_instance = True
-    exclude = ("_password_hash", "_security_answer_hash")
+class UserSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = User
+        load_instance = True
+        exclude = ("_password_hash", "_security_answer_hash")
 
