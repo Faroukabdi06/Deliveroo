@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import ParcelTimeline from "../../components/ParcelTimeline";
 import ParcelMap from "../../components/ParcelMap";
 import Spinner from "../../components/Spinner";
+import api from "../../api/axios";
 
 export default function ParcelDetails() {
   const { id } = useParams();
@@ -13,23 +14,28 @@ export default function ParcelDetails() {
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  
+  const fallbackParcel = {
+    id: "fallback-123",
+    tracking_id: "TRK-DEV-001",
+    status: "IN_TRANSIT",
+    pickup_address: "Nairobi CBD, Kenya",
+    destination_address: "Westlands, Nairobi",
+    history: [
+      { status: "PENDING", timestamp: "2025-10-01 08:00" },
+      { status: "IN_TRANSIT", timestamp: "2025-10-01 12:00" },
+    ],
+  };
+
   useEffect(() => {
     const fetchParcel = async () => {
       try {
-        const BASE_URL = import.meta.env.VITE_BASE_URL;
-        const res = await fetch(`${BASE_URL}/parcels/${id}`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-
-        if (!res.ok) throw new Error("Failed to fetch parcel");
-        const data = await res.json();
-        setParcel(data);
+        const res = await api.get(`/parcels/${id}`);
+        setParcel(res.data);
       } catch (err) {
         console.error("Error fetching parcel:", err);
-        setError("Could not load parcel details.");
+        setError("Could not load parcel details. Showing fallback data.");
+        setParcel(fallbackParcel); 
       } finally {
         setLoading(false);
       }
@@ -43,16 +49,7 @@ export default function ParcelDetails() {
 
     setActionLoading(true);
     try {
-      const BASE_URL = import.meta.env.VITE_BASE_URL;
-      const res = await fetch(`${BASE_URL}/parcels/${id}/cancel`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      if (!res.ok) throw new Error("Failed to cancel parcel");
-
+      await api.patch(`/parcels/${id}/cancel`);
       navigate("/dashboard");
     } catch (err) {
       console.error(err);
@@ -68,17 +65,9 @@ export default function ParcelDetails() {
 
     setActionLoading(true);
     try {
-      const BASE_URL = import.meta.env.VITE_BASE_URL;
-      const res = await fetch(`${BASE_URL}/parcels/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({ destination_address: newAddress }),
+      await api.patch(`/parcels/${id}`, {
+        destination_address: newAddress,
       });
-
-      if (!res.ok) throw new Error("Failed to update parcel");
 
       setParcel((prev) => ({
         ...prev,
@@ -111,8 +100,31 @@ export default function ParcelDetails() {
         gap: "24px",
       }}
     >
-      <h1 style={{ fontSize: "28px", fontWeight: "bold", color: "#111827" }}>
+      <h1
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          fontSize: "28px",
+          fontWeight: "bold",
+          color: "#111827",
+          marginBottom: "16px",
+        }}
+      >
         Parcel Details
+        <button
+          onClick={() => navigate("/dashboard")}
+          style={{
+            padding: "6px 12px",
+            backgroundColor: "#f3f4f6",
+            border: "1px solid #d1d5db",
+            borderRadius: "6px",
+            cursor: "pointer",
+            marginLeft: "auto",
+          }}
+        >
+          ← Back
+        </button>
       </h1>
 
       {error && <p style={{ color: "#DC2626" }}>{error}</p>}
@@ -203,3 +215,4 @@ export default function ParcelDetails() {
     </div>
   );
 }
+

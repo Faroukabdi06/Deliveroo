@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ParcelDetails from '../pages/Customer/ParcelDetails';
 import axios from "../api/axios"; 
 
 export default function ParcelCard({ parcel }) {
@@ -49,11 +50,13 @@ export default function ParcelCard({ parcel }) {
 
   return (
     <div
+      // onClick={handleTrack}
       style={{
         border: "1px solid #e5e7eb",
         borderRadius: "0.75rem",
         padding: "1rem",
         backgroundColor: "white",
+        // cursor: 'pointer',
         boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
         transition: "box-shadow 0.2s",
       }}

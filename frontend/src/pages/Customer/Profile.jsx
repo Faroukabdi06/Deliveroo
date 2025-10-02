@@ -57,10 +57,11 @@ export default function UserProfile() {
         setError("Failed to load user profile");
         const fallbackUser = {
           id: "demo-user-1",
-          name: "Jane Doe",
-          email: "jane.doe@example.com",
+          name: "John Smith",
+          email: "john.smith@example.com",
           role: "customer",
-          phone: "+254 700 000000",
+          dateOfBirth: '2000-06-06',
+          phone: "+254 734 457890",
           statistics: {
             memberSince: "2023-01-01",
             lastActive: "2025-09-25 18:00",
