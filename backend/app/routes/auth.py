@@ -11,6 +11,7 @@ from flask_jwt_extended import (
 from email_validator import validate_email, EmailNotValidError
 from marshmallow import ValidationError
 from datetime import datetime
+import uuid
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -19,7 +20,7 @@ auth_bp = Blueprint('auth', __name__)
 @jwt_required(refresh=True)
 def refresh():
     identity = get_jwt_identity()
-    user = User.query.get(identity)
+    user = User.query.get(uuid.UUID(identity))
     if not user:
         return jsonify({"success": False, "msg": "User not found"}), 404
 

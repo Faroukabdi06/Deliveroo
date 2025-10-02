@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app.extensions import db
-from app.models import User, Parcel, Address, StatusHistory, ParcelStatus, Notification, NotificationType,_generate_tracking_id
-from app.schemas import ParcelSchema, ParcelCreateSchema, AddressRequestSchema
+from app.models import User,UserRole, Parcel, Address, StatusHistory, ParcelStatus, Notification, NotificationType,_generate_tracking_id
+from app.schemas import ParcelSchema, ParcelCreateSchema, AddressRequestSchema, UserSchema
 from app.utilis.auth import jwt_required_customer
 from datetime import datetime, timedelta
 from marshmallow import ValidationError
@@ -10,6 +10,7 @@ customer_bp = Blueprint('customer', __name__)
 parcel_schema = ParcelSchema()
 parcel_create_schema = ParcelCreateSchema()
 address_schema = AddressRequestSchema()
+user_schema = UserSchema()
 
 
 @customer_bp.route('/parcels', methods=['POST'])
@@ -20,46 +21,46 @@ def create_parcel(current_user):
     except ValidationError as e:
         return jsonify({"success": False, "errors": e.messages}), 400
 
-    # Create addresses
+    # Create pickup and delivery addresses
     pickup_address = Address(**data['pickup_address'])
     delivery_address = Address(**data['delivery_address'])
     db.session.add(pickup_address)
     db.session.add(delivery_address)
-    db.session.flush()  # Get IDs
+    db.session.flush()  # ensure IDs are available
 
-    # Create parcel
+    # Create the parcel
     parcel = Parcel(
         tracking_id=_generate_tracking_id(),
         customer_id=current_user.id,
         pickup_address_id=pickup_address.id,
         delivery_address_id=delivery_address.id,
         weight_kg=data['weight_kg'],
-        notes=data.get('notes'),
         status=ParcelStatus.CREATED,
         estimated_delivery_date=datetime.utcnow().date() + timedelta(days=2)
     )
     db.session.add(parcel)
+    db.session.flush()  # ensure parcel.id is available for status history
 
-    # Status history
+    # Add status history
     status_history = StatusHistory(
         parcel_id=parcel.id,
         status=ParcelStatus.CREATED,
         actor_id=current_user.id,
-        notes=data.get('notes', 'Parcel created by customer')
+        notes=data.get('notes') or "Parcel created by customer"
     )
     db.session.add(status_history)
 
-    # Notify admins
+    # Notify all admins
     admins = User.query.filter_by(role=UserRole.ADMIN).all()
     for admin in admins:
-        notif = Notification(
+        notif_admin = Notification(
             user_id=admin.id,
             message=f"New parcel {parcel.tracking_id} created by {current_user.name}",
             type=NotificationType.ALERT
         )
-        db.session.add(notif)
+        db.session.add(notif_admin)
 
-    # Notify customer
+    # Notify the customer
     notif_customer = Notification(
         user_id=current_user.id,
         message=f"Your parcel {parcel.tracking_id} has been created successfully.",
@@ -67,10 +68,12 @@ def create_parcel(current_user):
     )
     db.session.add(notif_customer)
 
+    # Commit everything
     db.session.commit()
 
     parcel_data = parcel_schema.dump(parcel)
     return jsonify({"success": True, "data": parcel_data, "message": "Parcel created successfully"}), 201
+
 
 
 @customer_bp.route('/parcels', methods=['GET'])
@@ -119,8 +122,7 @@ def update_parcel(current_user, parcel_id):
         notes="Delivery address updated by customer"
     )
     db.session.add(status_history)
-    db.session.commit()
-
+    
     # Notify customer
     notif_customer = Notification(
         user_id=current_user.id,
@@ -128,9 +130,19 @@ def update_parcel(current_user, parcel_id):
         type=NotificationType.PARCEL_UPDATE
     )
     db.session.add(notif_customer)
+
+    # Commit all changes at once
     db.session.commit()
 
-    return jsonify({"success": True, "message": "Parcel updated successfully"}), 200
+    # Dump the updated parcel
+    parcel_data = parcel_schema.dump(parcel)
+
+    return jsonify({
+        "success": True,
+        "message": "Parcel updated successfully",
+        "data": parcel_data  # <-- include updated parcel
+    }), 200
+
 
 
 @customer_bp.route('/parcels/<uuid:parcel_id>/cancel', methods=['POST'])
@@ -176,3 +188,34 @@ def cancel_parcel(current_user, parcel_id):
     db.session.commit()
 
     return jsonify({"success": True, "message": "Parcel cancelled successfully"}), 200
+#Get userprofile
+@customer_bp.route('/profile', methods=['GET'])
+@jwt_required_customer
+def get_profile(current_user):
+    user_data = user_schema.dump(current_user)
+    return jsonify({"success": True, "data": user_data}), 200
+
+
+# PATCH customer profile
+@customer_bp.route('/profile', methods=['PATCH'])
+@jwt_required_customer
+def update_profile(current_user):
+    json_data = request.json
+    if not json_data:
+        return jsonify({"success": False, "error": "No data provided"}), 400
+
+    # Only allow certain fields to be updated
+    allowed_fields = ['name', 'email', 'phone_number', 'password']
+    for field in allowed_fields:
+        if field in json_data:
+            if field == 'password':
+                current_user.password = json_data[field]
+            else:
+                setattr(current_user, field, json_data[field])
+
+    current_user.updated_at = datetime.utcnow()
+    db.session.add(current_user)
+    db.session.commit()
+
+    user_data = user_schema.dump(current_user)
+    return jsonify({"success": True, "data": user_data, "message": "Profile updated successfully"}), 200
