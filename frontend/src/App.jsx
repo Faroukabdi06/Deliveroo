@@ -18,7 +18,7 @@ import ParcelForm from "./components/customer/ParcelForm";
 import UserProfile from "./components/customer/Profile";
 import CustomerNotifications from "./pages/customer/CustomerNotifications";
 
-// -------------------- ProtectedRoute --------------------
+
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const dispatch = useDispatch();
   const { token, role } = useSelector((state) => state.auth);
@@ -30,10 +30,11 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
       try {
         let accessToken = token;
 
+        // If no token in Redux, attempt refresh
         if (!accessToken) {
-          // Attempt to refresh token using stored refresh token
-          const result = await dispatch(refreshToken()).unwrap();
-          accessToken = result.access_token;
+          await dispatch(refreshToken()).unwrap();
+          // Read updated token from localStorage
+          accessToken = localStorage.getItem("token");
         }
 
         if (accessToken) {
@@ -53,6 +54,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   if (!isAuthenticated) return <Navigate to="/auth" replace />;
 
   const normalizedRole = role?.toLowerCase() || localStorage.getItem("role")?.toLowerCase();
+
   if (allowedRoles && !allowedRoles.includes(normalizedRole)) {
     return <Navigate to="/" replace />;
   }

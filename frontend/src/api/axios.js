@@ -1,13 +1,12 @@
-// src/api/axios.js
 import axios from "axios";
+import { authApi } from "./authApi";
 import { logout } from "../features/auth/authSlice";
 
-// Create Axios instance
 const api = axios.create({
   baseURL: "https://deliveroo-ra7p.onrender.com/api",
 });
 
-// Queue for handling multiple 401 requests
+// Queue to handle multiple 401s while refreshing
 let isRefreshing = false;
 let failedQueue = [];
 
@@ -26,7 +25,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle responses (401 = access token expired)
+// Response interceptor to handle 401
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -34,7 +33,7 @@ api.interceptors.response.use(
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
-        // Queue the request while refreshing token
+        // Queue the request while token is being refreshed
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
@@ -50,14 +49,13 @@ api.interceptors.response.use(
 
       try {
         const refreshToken = localStorage.getItem("refreshToken");
-        if (!refreshToken) throw new Error("No refresh token");
+        if (!refreshToken) throw new Error("No refresh token available");
 
-        const res = await axios.post(
-          "https://deliveroo-ra7p.onrender.com/api/auth/refresh",
+        // Use authApi for refresh
+        const res = await authApi.post(
+          "/refresh",
           {},
-          {
-            headers: { Authorization: `Bearer ${refreshToken}` },
-          }
+          { headers: { Authorization: `Bearer ${refreshToken}` } }
         );
 
         const newToken = res.data.access_token;
