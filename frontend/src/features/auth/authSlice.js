@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../api/axios";
+import { authApi } from "../../api/authApi";
 
 // ------------------- Thunks -------------------
 
@@ -40,15 +41,14 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-// Refresh Token
 export const refreshToken = createAsyncThunk(
   "auth/refreshToken",
-  async (_, { rejectWithValue }) => {
+  async (_, { rejectWithValue, dispatch }) => {
     try {
       const refresh_token = localStorage.getItem("refreshToken");
       if (!refresh_token) throw new Error("No refresh token available");
 
-      const response = await api.post(
+      const response = await authApi.post(
         "/refresh",
         {},
         { headers: { Authorization: `Bearer ${refresh_token}` } }
@@ -56,21 +56,17 @@ export const refreshToken = createAsyncThunk(
 
       const { access_token, role } = response.data;
 
-      // Update localStorage
       localStorage.setItem("token", access_token);
       localStorage.setItem("role", role);
 
       return { access_token, role };
     } catch (error) {
-      // Clear storage if refresh fails
-      localStorage.removeItem("token");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("role");
+      // Clear all tokens if refresh fails
+      dispatch(logout());
       return rejectWithValue(error.response?.data || { msg: "Token refresh failed" });
     }
   }
 );
-
 // Reset Password
 export const resetPassword = createAsyncThunk(
   "auth/resetPassword",
@@ -161,8 +157,10 @@ const authSlice = createSlice({
       .addCase(refreshToken.fulfilled, (state, action) => {
         state.loading = false;
         state.token = action.payload.access_token;
+        state.refreshToken = localStorage.getItem("refreshToken");
         state.role = action.payload.role?.toLowerCase();
       })
+
       .addCase(refreshToken.rejected, (state, action) => {
         state.loading = false;
         state.token = null;
