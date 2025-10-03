@@ -37,7 +37,7 @@ A full-stack parcel management application with **admin and customer roles**, JW
 - **Backend**: Flask, Flask-JWT-Extended, SQLAlchemy, Marshmallow, SQLite
 - **Frontend**: React, Redux Toolkit, React Router, Axios
 - **Authentication**: JWT access & refresh tokens
-- **Deployment**: Render (backend), Netlify/Vercel (frontend)
+- **Deployment**: Render (backend)and (frontend)
 
 ---
 
