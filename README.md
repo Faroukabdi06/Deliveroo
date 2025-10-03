@@ -13,8 +13,6 @@ A full-stack parcel management application with **admin and customer roles**, JW
 - [Backend API](#backend-api)
 - [Frontend](#frontend)
 - [Authentication Flow](#authentication-flow)
-- [Folder Structure](#folder-structure)
-- [Tips & Troubleshooting](#tips--troubleshooting)
 - [License](#license)
 
 ---
@@ -121,6 +119,12 @@ Redux Toolkit stores token, refreshToken, role, and user state
 
 Axios interceptors automatically refresh access token on 401 responses
 ```
+
+## Deployed links
+Frontend: [https://deliveroo-4lqr.onrender.com/](URL "https://deliveroo-4lqr.onrender.com/")
+
+Backend: [https://deliveroo-ra7p.onrender.com](URL "https://deliveroo-ra7p.onrender.com")
+
 
 ## Screenshots / Frontend Preview
 
