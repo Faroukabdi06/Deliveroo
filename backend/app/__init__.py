@@ -33,7 +33,7 @@ def create_app(config_name="development"):
     bcrypt.init_app(app)
     jwt.init_app(app)
     cors.init_app(app,
-    resources={r"/*": {"origins": "http://localhost:5173"}},
+    resources={r"/*": {"origins": "http://localhost:5173","https://deliveroo-4lqr.onrender.com/"}},
     supports_credentials=True,
     methods=["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
     allow_headers=["Content-Type", "Authorization"])
