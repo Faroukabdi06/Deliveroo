@@ -1,0 +1,163 @@
+.customer-dashboard {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f9fafb;
+  font-family: "Inter", sans-serif;
+}
+
+/* Main content */
+.customer-dashboard-main {
+  flex: 1;
+  /* margin-left: 240px; */
+  padding: 2rem;
+  background-color: #f9fafb;
+}
+
+/* Typography */
+.customer-dashboard-main h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.customer-dashboard-main p {
+  font-size: 1rem;
+  color: #4b5563;
+  margin-bottom: 1.5rem;
+}
+
+/* =====================
+   Dashboard Stats
+===================== */
+.customer-dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.customer-dashboard-stat-card {
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  background-color: #fff;
+}
+
+.customer-dashboard-stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.customer-dashboard-stat-card.active {
+  border-left: 4px solid #2563eb;
+}
+
+.customer-dashboard-stat-card.completed {
+  border-left: 4px solid #059669;
+}
+
+.customer-dashboard-stat-card.total {
+  border-left: 4px solid #7c3aed;
+}
+
+.customer-dashboard-stat-card p:first-child {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.customer-dashboard-stat-card p:nth-child(2) {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.customer-dashboard-stat-card div {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  align-items: center;
+  color: #6b7280;
+}
+
+/* =====================
+   Quick Actions
+===================== */
+.customer-dashboard-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.customer-dashboard-quick-actions button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 1rem;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.customer-dashboard-quick-actions button:hover {
+  background-color: #1e40af;
+  transform: translateY(-2px);
+}
+
+/* =====================
+   Parcels Grid
+===================== */
+.customer-dashboard-parcels {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* Filter Input */
+.customer-dashboard-main input[type="text"] {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  font-size: 0.875rem;
+  color: #111827;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.customer-dashboard-main input[type="text"]:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+/* Loading / Error Messages */
+.customer-dashboard-main p {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.customer-dashboard-main p[style*="color: red"] {
+  color: #ef4444;
+}
+
+/* =====================
+   Buttons inside cards or forms
+===================== */
+button {
+  font-family: "Inter", sans-serif;
+  transition: all 0.2s ease;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

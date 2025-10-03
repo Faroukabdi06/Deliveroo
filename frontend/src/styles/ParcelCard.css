@@ -1,0 +1,80 @@
+/* --- Card Container --- */
+.parcel-card {
+  background: #ffffff;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.parcel-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* --- Title --- */
+.parcel-card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* --- Text & Labels --- */
+.parcel-card-text {
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.parcel-card-label {
+  font-weight: 500;
+  color: #6b7280;
+}
+
+/* --- Updated timestamp --- */
+.parcel-card-updated {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  margin-top: auto;
+}
+
+/* --- Track Button --- */
+.parcel-card-button {
+  margin-top: 1rem;
+  padding: 0.65rem 1rem;
+  background-color: #2563eb;
+  color: white;
+  border-radius: 0.5rem;
+  border: none;
+  font-weight: 500;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.parcel-card-button:hover {
+  background-color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+/* --- Completed / Canceled Status --- */
+.parcel-card-completed {
+  margin-top: 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.parcel-card-completed.delivered {
+  color: #16a34a; /* green */
+}
+
+.parcel-card-completed.canceled {
+  color: #dc2626; /* red */
+}
+
+/* --- Optional: gray out completed cards --- */
+.parcel-card.completed {
+  opacity: 0.7;
+  pointer-events: none;
+}

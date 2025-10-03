@@ -1,0 +1,224 @@
+/* General Layout */
+.profile-page {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f4f6f8;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Sidebar */
+.profile-sidebar {
+  width: 280px;
+  background-color: #fff;
+  padding: 2rem;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Avatar */
+.profile-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 12px;
+  background-color: #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: #fff;
+}
+
+/* Sidebar Tabs */
+.profile-tab-button {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  background-color: #f3f4f6;
+  color: #111;
+  transition: all 0.2s ease;
+}
+
+.profile-tab-button.active {
+  background-color: #2563eb;
+  color: #fff;
+}
+
+/* Main content */
+.profile-main {
+  flex: 1;
+  padding: 2rem;
+}
+
+/* Card Layout */
+.profile-card {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+/* Input fields */
+.profile-input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.profile-input-group label {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.profile-input-group input {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+
+/* Buttons */
+.profile-button {
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.profile-button.save {
+  background-color: #2563eb;
+  color: #fff;
+}
+
+.profile-button.cancel {
+  background-color: #f3f4f6;
+  color: #111;
+  border: 1px solid #ccc;
+}
+
+/* Activity Feed */
+.activity-feed {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 16px;
+}
+
+.activity-feed li {
+  position: relative;
+  margin-bottom: 24px;
+  padding-left: 40px;
+}
+
+.activity-feed li::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #2563eb; /* default blue */
+}
+
+.activity-feed li.delivered::before {
+  background-color: #16a34a;
+}
+
+.activity-feed li.cancelled::before {
+  background-color: #dc2626;
+}
+
+.activity-feed .tracking-id {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.activity-feed .status {
+  font-size: 13px;
+  color: #555;
+}
+
+.activity-feed .timestamp {
+  font-size: 12px;
+  color: #999;
+}
+
+/* Security Tab */
+.security-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  font-size: 14px;.parcel-card {
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  padding: 1.25rem;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+.parcel-card:hover {
+  transform: translateY(-2px);
+}
+
+.parcel-card-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.parcel-card-text {
+  font-size: 0.95rem;
+  margin: 0.25rem 0;
+  color: #374151;
+}
+
+.parcel-card-label {
+  font-weight: 500;
+  color: #111827;
+}
+
+.parcel-card-updated {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+}
+
+.parcel-card-button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+
+.parcel-card-button:hover {
+  background-color: #1d4ed8;
+}
+
+/* Disabled button */
+.parcel-card-button.disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+  color: #555;
+}
