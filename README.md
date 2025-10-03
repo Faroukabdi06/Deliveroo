@@ -127,18 +127,18 @@ Axios interceptors automatically refresh access token on 401 responses
 Here are some screenshots of the frontend interface:
 
 ### Landing Page
-![Landing Page](frontend/src/assets/Screenshot 2025-10-03 190546.png)
+![Landing Page](screenshots/Screenshot%202025-10-03%20190546.png)
+
+### Login Page
+![Login Page](screenshots/Screenshot%202025-10-03%20190606.png)
 
 ### Customer Dashboard
-![Customer Dashboard](screenshots/Screenshot 2025-10-03 190941.png)
+![Customer Dashboard](screenshots/Screenshot%202025-10-03%20190941.png)
 
-### Parcel Form
-![Parcel ](./screenshots/parcel-form.png)
+
 
 ### Admin Dashboard
-![Admin Dashboard]()
-
-
+![Admin Dashboard](screenshots/Screenshot%202025-10-03%20190624.png)
 
 
 ## Acknowledgements
