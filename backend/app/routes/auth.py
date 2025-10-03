@@ -57,7 +57,7 @@ def signup():
 
     # Validates email format
     try:
-        email = validate_email(email).email
+        email = validate_email(email).normalized
     except EmailNotValidError as e:
         return jsonify({"success": False, "msg": str(e)}), 400
 

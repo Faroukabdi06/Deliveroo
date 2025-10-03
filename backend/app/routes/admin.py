@@ -190,7 +190,8 @@ def system_stats():
     out_for_delivery = Parcel.query.filter(Parcel.status == ParcelStatus.OUT_FOR_DELIVERY).count()
     delivered = Parcel.query.filter(Parcel.status == ParcelStatus.DELIVERED).count()
     cancelled = Parcel.query.filter(Parcel.status == ParcelStatus.CANCELLED).count()
-    
+
+
     total_customers = User.query.filter(User.role == "CUSTOMER").count()
 
     return jsonify({
