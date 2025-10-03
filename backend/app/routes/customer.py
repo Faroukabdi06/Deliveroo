@@ -75,7 +75,6 @@ def create_parcel(current_user):
     return jsonify({"success": True, "data": parcel_data, "message": "Parcel created successfully"}), 201
 
 
-
 @customer_bp.route('/parcels', methods=['GET'])
 @jwt_required_customer
 def get_parcels(current_user):
@@ -122,7 +121,7 @@ def update_parcel(current_user, parcel_id):
         notes="Delivery address updated by customer"
     )
     db.session.add(status_history)
-    
+
     # Notify customer
     notif_customer = Notification(
         user_id=current_user.id,
