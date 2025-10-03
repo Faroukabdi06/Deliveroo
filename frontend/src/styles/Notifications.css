@@ -1,0 +1,135 @@
+.notifications-section {
+  padding: 20px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin: 20px;
+}
+
+.notifications-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.notifications-header h2 {
+  font-size: 1.8rem;
+  color: #1e293b;
+}
+
+.notifications-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.mark-all-btn,
+.delete-all-btn {
+  background-color: #3b82f6; /* blue */
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.delete-all-btn {
+  background-color: #ef4444; /* red */
+}
+
+.mark-all-btn:hover {
+  background-color: #2563eb;
+}
+
+.delete-all-btn:hover {
+  background-color: #dc2626;
+}
+
+.notifications-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.notification-item {
+  background-color: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  transition: background-color 0.2s ease;
+}
+
+.notification-item.read {
+  opacity: 0.7;
+}
+
+.notification-item.unread {
+  border-left: 4px solid #3b82f6;
+}
+
+.notification-item p {
+  margin: 0 0 6px 0;
+  font-size: 1rem;
+  color: #1f2937;
+}
+
+.notification-item small {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.notification-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.mark-read-btn,
+.delete-btn {
+  background-color: #10b981; /* green for mark read */
+  color: #fff;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.2s ease;
+}
+
+.delete-btn {
+  background-color: #ef4444; /* red for delete */
+}
+
+.mark-read-btn:hover {
+  background-color: #059669;
+}
+
+.delete-btn:hover {
+  background-color: #dc2626;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .notifications-header,
+  .notification-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .notifications-actions {
+    gap: 6px;
+  }
+
+  .notification-item {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

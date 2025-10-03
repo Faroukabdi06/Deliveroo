@@ -1,0 +1,173 @@
+.parcel-detail-container {
+  max-width: 4xl;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.parcel-detail-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+  text-align: center;
+}
+
+.parcel-detail-error {
+  color: #dc2626;
+  text-align: center;
+}
+
+.parcel-success-message {
+  color: #16a34a;
+  text-align: center;
+}
+
+.parcel-detail-card {
+  background-color: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.parcel-detail-label {
+  font-weight: 600;
+  color: #111827;
+}
+
+.parcel-detail-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.parcel-detail-btn {
+  padding: 0.5rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.parcel-detail-btn.cancel {
+  background-color: #dc2626;
+  color: white;
+}
+
+.parcel-detail-btn.cancel:hover {
+  background-color: #b91c1c;
+}
+
+.parcel-detail-btn.update {
+  background-color: #4b83b4;
+  color: white;
+}
+
+.parcel-detail-btn.update:hover {
+  background-color: #3b6a99;
+}
+
+.parcel-detail-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.parcel-back-button {
+  background-color: #e5e7eb;
+  color: #111827;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  border: none;
+  cursor: pointer;
+  width: fit-content;
+  transition: background-color 0.2s;
+}
+
+.parcel-back-button:hover {
+  background-color: #d1d5db;
+}
+
+/* Modal overlay */
+.parcel-update-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+/* Modal box */
+.parcel-update-modal {
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  width: 90%;
+  max-width: 450px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Modal title */
+.parcel-update-modal-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+  color: #111827;
+}
+
+/* Modal map */
+.parcel-update-modal .react-leaflet-container {
+  width: 100% !important;
+  height: 400px;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Modal inputs */
+.parcel-update-modal-input {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+  width: 100%;
+  background-color: #fff;
+}
+
+/* Modal buttons */
+.parcel-update-modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+  flex-shrink: 0;
+}
+
+/* Route map section */
+.parcel-map-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.parcel-map-section h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
